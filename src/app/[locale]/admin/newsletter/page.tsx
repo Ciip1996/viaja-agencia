@@ -16,9 +16,11 @@ import { cn } from "@/lib/utils/cn";
 interface Subscriber {
   id: string;
   email: string;
+  name: string | null;
   locale: string | null;
   is_active: boolean;
-  created_at: string;
+  subscribed_at: string;
+  unsubscribed_at: string | null;
 }
 
 export default function NewsletterPage() {
@@ -34,7 +36,7 @@ export default function NewsletterPage() {
       const { data, error: err } = await supabase
         .from("newsletter_subscribers")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("subscribed_at", { ascending: false });
 
       if (err) throw err;
       setItems(data ?? []);
@@ -83,11 +85,11 @@ export default function NewsletterPage() {
   };
 
   const exportCSV = () => {
-    const header = "Email,Locale,Active,Subscribed Date\n";
+    const header = "Email,Name,Locale,Active,Subscribed Date\n";
     const rows = items
       .map(
         (s) =>
-          `"${s.email}","${s.locale ?? ""}","${s.is_active ? "Yes" : "No"}","${new Date(s.created_at).toISOString()}"`
+          `"${s.email}","${s.name ?? ""}","${s.locale ?? ""}","${s.is_active ? "Yes" : "No"}","${new Date(s.subscribed_at).toISOString()}"`
       )
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
@@ -192,7 +194,7 @@ export default function NewsletterPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-text-muted hidden md:table-cell">
-                      {new Date(item.created_at).toLocaleDateString("es-MX", {
+                      {new Date(item.subscribed_at).toLocaleDateString("es-MX", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",

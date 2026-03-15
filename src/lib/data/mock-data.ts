@@ -13,6 +13,7 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
   {
@@ -27,6 +28,7 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
   {
@@ -41,6 +43,7 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
   {
@@ -55,6 +58,7 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
   {
@@ -69,6 +73,7 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
   {
@@ -83,30 +88,31 @@ export const promotions: Promotion[] = [
     is_active: true,
     valid_from: null,
     valid_until: null,
+    locale: "es",
     created_at: new Date().toISOString(),
   },
 ];
 
 export const destinations: Destination[] = [
-  { id: "1", name: "Europa", region: "Europa", description: "Descubre la magia del viejo continente", hero_image_url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80", gallery: null, practical_info: null, display_order: 1, is_active: true },
-  { id: "2", name: "Medio Oriente", region: "Medio Oriente", description: "Un mundo de contrastes fascinantes", hero_image_url: "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=800&q=80", gallery: null, practical_info: null, display_order: 2, is_active: true },
-  { id: "3", name: "Asia", region: "Asia", description: "Templos ancestrales y metrópolis vibrantes", hero_image_url: "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80", gallery: null, practical_info: null, display_order: 3, is_active: true },
-  { id: "4", name: "Pacífico", region: "Pacífico", description: "Islas paradisíacas y aguas cristalinas", hero_image_url: "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80", gallery: null, practical_info: null, display_order: 4, is_active: true },
-  { id: "5", name: "África", region: "África", description: "Safaris épicos y culturas vibrantes", hero_image_url: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80", gallery: null, practical_info: null, display_order: 5, is_active: true },
-  { id: "6", name: "Sudamérica", region: "Sudamérica", description: "Maravillas naturales y cultura rica", hero_image_url: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&q=80", gallery: null, practical_info: null, display_order: 6, is_active: true },
-  { id: "7", name: "Centroamérica", region: "Centroamérica", description: "Playas caribeñas y ruinas mayas", hero_image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80", gallery: null, practical_info: null, display_order: 7, is_active: true },
-  { id: "8", name: "Cuba y el Caribe", region: "Caribe", description: "Sol, arena blanca y ritmos tropicales", hero_image_url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80", gallery: null, practical_info: null, display_order: 8, is_active: true },
-  { id: "9", name: "Estados Unidos", region: "Norteamérica", description: "Ciudades icónicas y parques nacionales", hero_image_url: "https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=80", gallery: null, practical_info: null, display_order: 9, is_active: true },
-  { id: "10", name: "Canadá", region: "Norteamérica", description: "Naturaleza salvaje y auroras boreales", hero_image_url: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=800&q=80", gallery: null, practical_info: null, display_order: 10, is_active: true },
-  { id: "11", name: "México", region: "México", description: "Playas, gastronomía y cultura milenaria", hero_image_url: "https://images.unsplash.com/photo-1518638150340-f706e86654de?w=800&q=80", gallery: null, practical_info: null, display_order: 11, is_active: true },
-  { id: "12", name: "Cruceros", region: "Cruceros", description: "Navega por los mares del mundo", hero_image_url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80", gallery: null, practical_info: null, display_order: 12, is_active: true },
+  { id: "1", name: "Europa", region: "Europa", description: "Descubre la magia del viejo continente", hero_image_url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=800&q=80", gallery: null, practical_info: null, display_order: 1, locale: "es", is_active: true },
+  { id: "2", name: "Medio Oriente", region: "Medio Oriente", description: "Un mundo de contrastes fascinantes", hero_image_url: "https://images.unsplash.com/photo-1466442929976-97f336a657be?w=800&q=80", gallery: null, practical_info: null, display_order: 2, locale: "es", is_active: true },
+  { id: "3", name: "Asia", region: "Asia", description: "Templos ancestrales y metrópolis vibrantes", hero_image_url: "https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80", gallery: null, practical_info: null, display_order: 3, locale: "es", is_active: true },
+  { id: "4", name: "Pacífico", region: "Pacífico", description: "Islas paradisíacas y aguas cristalinas", hero_image_url: "https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800&q=80", gallery: null, practical_info: null, display_order: 4, locale: "es", is_active: true },
+  { id: "5", name: "África", region: "África", description: "Safaris épicos y culturas vibrantes", hero_image_url: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&q=80", gallery: null, practical_info: null, display_order: 5, locale: "es", is_active: true },
+  { id: "6", name: "Sudamérica", region: "Sudamérica", description: "Maravillas naturales y cultura rica", hero_image_url: "https://images.unsplash.com/photo-1526392060635-9d6019884377?w=800&q=80", gallery: null, practical_info: null, display_order: 6, locale: "es", is_active: true },
+  { id: "7", name: "Centroamérica", region: "Centroamérica", description: "Playas caribeñas y ruinas mayas", hero_image_url: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=800&q=80", gallery: null, practical_info: null, display_order: 7, locale: "es", is_active: true },
+  { id: "8", name: "Cuba y el Caribe", region: "Caribe", description: "Sol, arena blanca y ritmos tropicales", hero_image_url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80", gallery: null, practical_info: null, display_order: 8, locale: "es", is_active: true },
+  { id: "9", name: "Estados Unidos", region: "Norteamérica", description: "Ciudades icónicas y parques nacionales", hero_image_url: "https://images.unsplash.com/photo-1534430480872-3498386e7856?w=800&q=80", gallery: null, practical_info: null, display_order: 9, locale: "es", is_active: true },
+  { id: "10", name: "Canadá", region: "Norteamérica", description: "Naturaleza salvaje y auroras boreales", hero_image_url: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=800&q=80", gallery: null, practical_info: null, display_order: 10, locale: "es", is_active: true },
+  { id: "11", name: "México", region: "México", description: "Playas, gastronomía y cultura milenaria", hero_image_url: "https://images.unsplash.com/photo-1518638150340-f706e86654de?w=800&q=80", gallery: null, practical_info: null, display_order: 11, locale: "es", is_active: true },
+  { id: "12", name: "Cruceros", region: "Cruceros", description: "Navega por los mares del mundo", hero_image_url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80", gallery: null, practical_info: null, display_order: 12, locale: "es", is_active: true },
 ];
 
 export const faqs: FAQ[] = [
-  { id: "1", question: "¿Cómo puedo comenzar a planificar mi viaje con Viaja Agencia?", answer: "Es muy sencillo. Puedes contactarnos por teléfono al 477 779 0610, por WhatsApp, por correo electrónico a reservaciones@viajaagencia.com.mx o visitarnos en nuestras oficinas en León, Guanajuato. Uno de nuestros asesores te atenderá de forma personalizada.", display_order: 1, is_active: true },
-  { id: "2", question: "¿En qué destinos se especializan?", answer: "Contamos con más de 20 años de experiencia ofreciendo viajes a todo el mundo. Nos especializamos en Europa, Asia, Medio Oriente, el Caribe y destinos nacionales.", display_order: 2, is_active: true },
-  { id: "3", question: "¿Pueden ayudarme con viajes grupales?", answer: "Por supuesto. Organizamos viajes grupales para familias, amigos, empresas y grupos especiales. Manejamos toda la logística.", display_order: 3, is_active: true },
-  { id: "4", question: "¿Qué medidas de seguridad tienen durante el viaje?", answer: "Trabajamos únicamente con proveedores certificados y seguros de viaje internacionales. Además, ofrecemos asistencia 24/7 durante tu viaje.", display_order: 4, is_active: true },
-  { id: "5", question: "¿Qué tipo de soporte ofrecen durante el viaje?", answer: "Ofrecemos soporte 24/7 durante todo tu viaje. Puedes contactarnos por teléfono, WhatsApp o correo electrónico en cualquier momento.", display_order: 5, is_active: true },
-  { id: "6", question: "¿Puedo modificar mis planes de viaje una vez confirmados?", answer: "Entendemos que los planes pueden cambiar. Trabajamos contigo para hacer las modificaciones necesarias sujetas a las políticas de cada proveedor.", display_order: 6, is_active: true },
+  { id: "1", question: "¿Cómo puedo comenzar a planificar mi viaje con Viaja Agencia?", answer: "Es muy sencillo. Puedes contactarnos por teléfono al 477 779 0610, por WhatsApp, por correo electrónico a reservaciones@viajaagencia.com.mx o visitarnos en nuestras oficinas en León, Guanajuato. Uno de nuestros asesores te atenderá de forma personalizada.", display_order: 1, locale: "es", is_active: true },
+  { id: "2", question: "¿En qué destinos se especializan?", answer: "Contamos con más de 20 años de experiencia ofreciendo viajes a todo el mundo. Nos especializamos en Europa, Asia, Medio Oriente, el Caribe y destinos nacionales.", display_order: 2, locale: "es", is_active: true },
+  { id: "3", question: "¿Pueden ayudarme con viajes grupales?", answer: "Por supuesto. Organizamos viajes grupales para familias, amigos, empresas y grupos especiales. Manejamos toda la logística.", display_order: 3, locale: "es", is_active: true },
+  { id: "4", question: "¿Qué medidas de seguridad tienen durante el viaje?", answer: "Trabajamos únicamente con proveedores certificados y seguros de viaje internacionales. Además, ofrecemos asistencia 24/7 durante tu viaje.", display_order: 4, locale: "es", is_active: true },
+  { id: "5", question: "¿Qué tipo de soporte ofrecen durante el viaje?", answer: "Ofrecemos soporte 24/7 durante todo tu viaje. Puedes contactarnos por teléfono, WhatsApp o correo electrónico en cualquier momento.", display_order: 5, locale: "es", is_active: true },
+  { id: "6", question: "¿Puedo modificar mis planes de viaje una vez confirmados?", answer: "Entendemos que los planes pueden cambiar. Trabajamos contigo para hacer las modificaciones necesarias sujetas a las políticas de cada proveedor.", display_order: 6, locale: "es", is_active: true },
 ];

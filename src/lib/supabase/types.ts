@@ -22,6 +22,7 @@ export interface Database {
           is_active: boolean;
           valid_from: string | null;
           valid_until: string | null;
+          locale: string;
           created_at: string;
         };
         Insert: {
@@ -36,6 +37,7 @@ export interface Database {
           is_active?: boolean;
           valid_from?: string | null;
           valid_until?: string | null;
+          locale?: string;
           created_at?: string;
         };
         Update: {
@@ -50,6 +52,7 @@ export interface Database {
           is_active?: boolean;
           valid_from?: string | null;
           valid_until?: string | null;
+          locale?: string;
           created_at?: string;
         };
       };
@@ -69,6 +72,7 @@ export interface Database {
           image_url: string | null;
           is_featured: boolean;
           is_active: boolean;
+          locale: string;
           created_at: string;
         };
         Insert: {
@@ -86,6 +90,7 @@ export interface Database {
           image_url?: string | null;
           is_featured?: boolean;
           is_active?: boolean;
+          locale?: string;
           created_at?: string;
         };
         Update: {
@@ -103,6 +108,7 @@ export interface Database {
           image_url?: string | null;
           is_featured?: boolean;
           is_active?: boolean;
+          locale?: string;
           created_at?: string;
         };
       };
@@ -117,6 +123,7 @@ export interface Database {
           practical_info: string | null;
           display_order: number;
           is_active: boolean;
+          locale: string;
         };
         Insert: {
           id?: string;
@@ -128,6 +135,7 @@ export interface Database {
           practical_info?: string | null;
           display_order?: number;
           is_active?: boolean;
+          locale?: string;
         };
         Update: {
           id?: string;
@@ -139,6 +147,7 @@ export interface Database {
           practical_info?: string | null;
           display_order?: number;
           is_active?: boolean;
+          locale?: string;
         };
       };
       group_trips: {
@@ -154,6 +163,8 @@ export interface Database {
           price_usd: number;
           image_url: string | null;
           is_active: boolean;
+          locale: string;
+          created_at: string;
         };
         Insert: {
           id?: string;
@@ -167,6 +178,8 @@ export interface Database {
           price_usd: number;
           image_url?: string | null;
           is_active?: boolean;
+          locale?: string;
+          created_at?: string;
         };
         Update: {
           id?: string;
@@ -180,6 +193,8 @@ export interface Database {
           price_usd?: number;
           image_url?: string | null;
           is_active?: boolean;
+          locale?: string;
+          created_at?: string;
         };
       };
       events: {
@@ -190,6 +205,8 @@ export interface Database {
           description: string | null;
           image_url: string | null;
           is_active: boolean;
+          locale: string;
+          created_at: string;
         };
         Insert: {
           id?: string;
@@ -198,6 +215,8 @@ export interface Database {
           description?: string | null;
           image_url?: string | null;
           is_active?: boolean;
+          locale?: string;
+          created_at?: string;
         };
         Update: {
           id?: string;
@@ -206,6 +225,8 @@ export interface Database {
           description?: string | null;
           image_url?: string | null;
           is_active?: boolean;
+          locale?: string;
+          created_at?: string;
         };
       };
       blog_posts: {
@@ -219,6 +240,7 @@ export interface Database {
           author: string;
           is_published: boolean;
           published_at: string | null;
+          locale: string;
           created_at: string;
         };
         Insert: {
@@ -231,6 +253,7 @@ export interface Database {
           author?: string;
           is_published?: boolean;
           published_at?: string | null;
+          locale?: string;
           created_at?: string;
         };
         Update: {
@@ -243,6 +266,7 @@ export interface Database {
           author?: string;
           is_published?: boolean;
           published_at?: string | null;
+          locale?: string;
           created_at?: string;
         };
       };
@@ -253,6 +277,7 @@ export interface Database {
           answer: string;
           display_order: number;
           is_active: boolean;
+          locale: string;
         };
         Insert: {
           id?: string;
@@ -260,6 +285,7 @@ export interface Database {
           answer: string;
           display_order?: number;
           is_active?: boolean;
+          locale?: string;
         };
         Update: {
           id?: string;
@@ -267,6 +293,7 @@ export interface Database {
           answer?: string;
           display_order?: number;
           is_active?: boolean;
+          locale?: string;
         };
       };
       site_settings: {
@@ -274,16 +301,148 @@ export interface Database {
           key: string;
           value: string;
           updated_at: string;
+          category: string;
+          label: string;
+          field_type: string;
+          locale: string;
         };
         Insert: {
           key: string;
           value: string;
           updated_at?: string;
+          category?: string;
+          label?: string;
+          field_type?: string;
+          locale?: string;
         };
         Update: {
           key?: string;
           value?: string;
           updated_at?: string;
+          category?: string;
+          label?: string;
+          field_type?: string;
+          locale?: string;
+        };
+      };
+      quote_requests: {
+        Row: {
+          id: string;
+          source: string;
+          status: string;
+          client_name: string;
+          client_email: string;
+          client_phone: string | null;
+          destination: string;
+          travel_type: string | null;
+          check_in: string | null;
+          check_out: string | null;
+          adults: number | null;
+          children: number | null;
+          budget_range: string | null;
+          notes: string | null;
+          chat_history: Json | null;
+          assigned_to: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          source?: string;
+          status?: string;
+          client_name: string;
+          client_email: string;
+          client_phone?: string | null;
+          destination: string;
+          travel_type?: string | null;
+          check_in?: string | null;
+          check_out?: string | null;
+          adults?: number | null;
+          children?: number | null;
+          budget_range?: string | null;
+          notes?: string | null;
+          chat_history?: Json | null;
+          assigned_to?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          source?: string;
+          status?: string;
+          client_name?: string;
+          client_email?: string;
+          client_phone?: string | null;
+          destination?: string;
+          travel_type?: string | null;
+          check_in?: string | null;
+          check_out?: string | null;
+          adults?: number | null;
+          children?: number | null;
+          budget_range?: string | null;
+          notes?: string | null;
+          chat_history?: Json | null;
+          assigned_to?: string | null;
+          created_at?: string;
+        };
+      };
+      newsletter_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          name: string | null;
+          locale: string | null;
+          is_active: boolean;
+          subscribed_at: string;
+          unsubscribed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          name?: string | null;
+          locale?: string | null;
+          is_active?: boolean;
+          subscribed_at?: string;
+          unsubscribed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string | null;
+          locale?: string | null;
+          is_active?: boolean;
+          subscribed_at?: string;
+          unsubscribed_at?: string | null;
+        };
+      };
+      contact_submissions: {
+        Row: {
+          id: string;
+          name: string;
+          email: string;
+          phone: string | null;
+          travel_type: string | null;
+          message: string;
+          is_read: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email: string;
+          phone?: string | null;
+          travel_type?: string | null;
+          message: string;
+          is_read?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          email?: string;
+          phone?: string | null;
+          travel_type?: string | null;
+          message?: string;
+          is_read?: boolean;
+          created_at?: string;
         };
       };
     };
@@ -298,3 +457,6 @@ export type Event = Database["public"]["Tables"]["events"]["Row"];
 export type BlogPost = Database["public"]["Tables"]["blog_posts"]["Row"];
 export type FAQ = Database["public"]["Tables"]["faq"]["Row"];
 export type SiteSetting = Database["public"]["Tables"]["site_settings"]["Row"];
+export type QuoteRequest = Database["public"]["Tables"]["quote_requests"]["Row"];
+export type NewsletterSubscriber = Database["public"]["Tables"]["newsletter_subscribers"]["Row"];
+export type ContactSubmission = Database["public"]["Tables"]["contact_submissions"]["Row"];

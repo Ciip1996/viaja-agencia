@@ -194,12 +194,29 @@ export async function searchHotels(
   const signature = await generateSignature(config);
   const headers = buildHeaders(config, signature);
 
-  const body = {
+  // Hotelbeds uses destination codes; pass through if numeric, or use keyword search
+  const destination = params.destination
+    ? /^\d+$/.test(params.destination)
+      ? { code: parseInt(params.destination, 10) }
+      : { code: parseInt(params.destination, 10) || undefined }
+    : undefined;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: Record<string, any> = {
     stay: { checkIn: params.checkIn, checkOut: params.checkOut },
     occupancies: [
       { rooms: params.rooms || 1, adults: params.guests || 2, children: 0 },
     ],
   };
+
+  if (destination?.code) {
+    body.destination = destination;
+  }
+
+  // Filter by keyword if destination is a text string (not a code)
+  if (params.destination && !/^\d+$/.test(params.destination)) {
+    body.filter = { ...body.filter, keyword: params.destination };
+  }
 
   try {
     const res = await fetch(`${config.baseUrl}/hotels`, {

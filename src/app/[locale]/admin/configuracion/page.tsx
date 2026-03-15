@@ -28,7 +28,6 @@ import {
   Copy,
 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin-client";
-import { fetchWithLocale } from "@/lib/supabase/admin-query";
 
 type Setting = {
   key: string;
@@ -48,20 +47,20 @@ const CATEGORY_META: Record<
   string,
   { label: string; icon: typeof Building2; description: string }
 > = {
-  feature_flags: {
-    label: "Feature Flags",
-    icon: ToggleRight,
-    description: "Activa o desactiva funcionalidades del sitio",
-  },
-  api_keys: {
-    label: "API Keys",
-    icon: KeyRound,
-    description: "Claves de acceso a servicios externos (OpenAI, Hotelbeds, etc.)",
-  },
   general: {
     label: "General",
     icon: Building2,
     description: "Información de la empresa, contacto y redes sociales",
+  },
+  feature_flags: {
+    label: "Módulos del Sitio",
+    icon: ToggleRight,
+    description: "Activa o desactiva las secciones y funcionalidades visibles en el sitio",
+  },
+  api_keys: {
+    label: "Claves API",
+    icon: KeyRound,
+    description: "Claves de acceso a servicios externos (OpenAI, Hotelbeds, etc.)",
   },
   homepage_hero: {
     label: "Hero Principal",
@@ -151,9 +150,9 @@ const CATEGORY_META: Record<
 };
 
 const CATEGORY_ORDER = [
+  "general",
   "feature_flags",
   "api_keys",
-  "general",
   "homepage_hero",
   "homepage_ofertas",
   "homepage_porque",
@@ -180,40 +179,50 @@ export default function ConfiguracionPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("feature_flags");
+  const [activeCategory, setActiveCategory] = useState("general");
   const [activeLocale, setActiveLocale] = useState("es");
 
   const fetchData = useCallback(async (locale: string) => {
     setLoading(true);
-    try {
-      const { data } = await fetchWithLocale<Setting>("site_settings", locale, {
-        select: "key, value, category, label, field_type, locale",
-        orderBy: "category",
-        ascending: true,
-      });
+    const supabase = createAdminClient();
 
-      setAllSettings(data);
+    const applyResult = (rows: Setting[]) => {
+      setAllSettings(rows);
       const vals: Record<string, string> = {};
-      data.forEach((s) => (vals[s.key] = s.value));
+      rows.forEach((s) => (vals[s.key] = s.value));
       setEditValues(vals);
       setError(null);
+    };
+
+    try {
+      const { data, error: err } = await supabase
+        .from("site_settings")
+        .select("key, value, category, label, field_type, locale")
+        .eq("locale", locale)
+        .order("category", { ascending: true });
+
+      if (err) throw err;
+      applyResult((data ?? []) as Setting[]);
     } catch {
       try {
-        const supabase = createAdminClient();
-        const { data: raw } = await supabase.from("site_settings").select("key, value").order("key");
-        const settings = (raw ?? []).map((r: { key: string; value: string }) => ({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: raw, error: err2 } = await supabase
+          .from("site_settings")
+          .select("key, value, category, label, field_type")
+          .order("category", { ascending: true });
+
+        if (err2) throw err2;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const settings = (raw ?? []).map((r: any) => ({
           key: r.key,
           value: r.value,
-          category: "general",
-          label: r.key,
-          field_type: "text",
-          locale: "es",
+          category: r.category || "general",
+          label: r.label || r.key,
+          field_type: r.field_type || "text",
+          locale,
         }));
-        setAllSettings(settings);
-        const vals: Record<string, string> = {};
-        settings.forEach((s) => (vals[s.key] = s.value));
-        setEditValues(vals);
-        setError(null);
+        applyResult(settings);
       } catch {
         setError("Error al cargar la configuración. Verifica tu conexión a Supabase.");
       }

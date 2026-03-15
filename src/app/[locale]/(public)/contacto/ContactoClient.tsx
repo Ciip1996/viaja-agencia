@@ -373,7 +373,7 @@ export default function ContactoClient({ cms = {} }: { cms?: Record<string, stri
                       className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent font-body text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-accent-dark hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Send className={cn("h-4 w-4", loading && "animate-pulse")} aria-hidden="true" />
-                      {loading ? "Enviando..." : t("submitButton")}
+                      {loading ? t("submitting") : t("submitButton")}
                     </button>
                   </form>
                 </div>

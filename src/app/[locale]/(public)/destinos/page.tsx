@@ -93,7 +93,7 @@ export default async function DestinosPage({ params }: Props) {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {destinations.map((dest, index) => (
               <AnimatedSection key={dest.id} variant="scale-in" delay={index * 0.06} duration={0.5} className="h-full">
-                <Link href="#" className="group relative block h-[300px] overflow-hidden rounded-2xl cursor-pointer" aria-label={t("exploreAria", { name: dest.name })}>
+                <Link href={`/contacto?destination=${encodeURIComponent(dest.name)}`} className="group relative block h-[300px] overflow-hidden rounded-2xl cursor-pointer" aria-label={t("exploreAria", { name: dest.name })}>
                   {dest.hero_image_url && (
                     <Image src={dest.hero_image_url} alt={`${dest.name} — ${dest.description ?? dest.region}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
                   )}

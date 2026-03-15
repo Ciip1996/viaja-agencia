@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -281,6 +282,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Right side */}
           <div className="flex items-center gap-3">
+            <LanguageSwitcher scrolled />
+
             <div className="hidden sm:block text-right">
               <p className="text-sm font-medium text-text leading-tight truncate max-w-[180px]">
                 {user?.email ?? t("administrator")}

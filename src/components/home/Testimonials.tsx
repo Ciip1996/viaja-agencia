@@ -149,7 +149,7 @@ export default function Testimonials({
                 </span>
               </div>
               <p className="text-sm text-text-muted">
-                {googleReviews.totalReviews} reseñas en Google
+                {googleReviews.totalReviews} {t("googleReviewsCount")}
               </p>
             </div>
           )}
@@ -201,7 +201,7 @@ export default function Testimonials({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-accent transition-colors hover:text-accent/80"
               >
-                Ver todas las reseñas en Google Maps
+                {t("viewAllGoogleReviews")}
                 <ExternalLink size={14} />
               </a>
             </div>

@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Destination } from "@/lib/supabase/types";
 
-type FormData = Omit<Destination, "id"> & { id?: string };
+type FormData = Omit<Destination, "id" | "locale"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   name: "",

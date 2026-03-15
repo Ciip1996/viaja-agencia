@@ -15,6 +15,23 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { cn } from "@/lib/utils/cn";
 import { formatPrice } from "@/lib/utils/format";
 import { getContentByCategory } from "@/lib/cms/content";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import type { GroupTrip } from "@/lib/supabase/types";
+
+async function getGroupTrips(locale: string): Promise<GroupTrip[] | null> {
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase
+      .from("group_trips")
+      .select("*")
+      .eq("is_active", true)
+      .eq("locale", locale)
+      .order("departure_date", { ascending: true });
+    return data && data.length > 0 ? (data as GroupTrip[]) : null;
+  } catch {
+    return null;
+  }
+}
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -29,55 +46,75 @@ export async function generateMetadata({ params }: Props) {
 
 const BENEFIT_ICONS = [Wallet, ShieldCheck, CalendarCheck, PartyPopper];
 
-const GROUP_TRIPS = [
-  {
-    id: "g1",
-    title: "Europa Express",
-    destination: "España, Francia e Italia",
-    image:
-      "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80",
-    price: 5800,
-    duration: "12 días",
-    spots: "8 lugares disponibles",
-  },
-  {
-    id: "g2",
-    title: "Tierra Santa",
-    destination: "Israel y Jordania",
-    image:
-      "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
-    price: 6200,
-    duration: "10 días",
-    spots: "12 lugares disponibles",
-  },
-  {
-    id: "g3",
-    title: "Japón Milenario",
-    destination: "Tokio, Kioto y Osaka",
-    image:
-      "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
-    price: 7500,
-    duration: "14 días",
-    spots: "6 lugares disponibles",
-  },
-  {
-    id: "g4",
-    title: "Sudáfrica Safari",
-    destination: "Ciudad del Cabo y Kruger",
-    image:
-      "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
-    price: 6800,
-    duration: "11 días",
-    spots: "10 lugares disponibles",
-  },
-];
-
 export default async function GruposPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
   const t = await getTranslations("pageGrupos");
   const tc = await getTranslations("common");
+
+  const GROUP_TRIPS = [
+    {
+      id: "g1",
+      title: t("trip1Title"),
+      destination: t("trip1Destination"),
+      image:
+        "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80",
+      price: 5800,
+      duration: t("trip1Duration"),
+      spots: t("trip1Spots"),
+    },
+    {
+      id: "g2",
+      title: t("trip2Title"),
+      destination: t("trip2Destination"),
+      image:
+        "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
+      price: 6200,
+      duration: t("trip2Duration"),
+      spots: t("trip2Spots"),
+    },
+    {
+      id: "g3",
+      title: t("trip3Title"),
+      destination: t("trip3Destination"),
+      image:
+        "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
+      price: 7500,
+      duration: t("trip3Duration"),
+      spots: t("trip3Spots"),
+    },
+    {
+      id: "g4",
+      title: t("trip4Title"),
+      destination: t("trip4Destination"),
+      image:
+        "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=800&q=80",
+      price: 6800,
+      duration: t("trip4Duration"),
+      spots: t("trip4Spots"),
+    },
+  ];
+
+  const dbTrips = await getGroupTrips(locale);
+
+  const trips = dbTrips
+    ? dbTrips.map((trip) => {
+        const dep = new Date(trip.departure_date);
+        const ret = new Date(trip.return_date);
+        const days = Math.max(1, Math.round((ret.getTime() - dep.getTime()) / 86_400_000));
+        const remaining = Math.max(0, (trip.max_travelers ?? 0) - (trip.current_travelers ?? 0));
+        return {
+          id: String(trip.id),
+          title: trip.title,
+          destination: trip.destination,
+          image: trip.image_url ?? "",
+          price: trip.price_usd,
+          duration: `${days}d`,
+          spots: `${remaining} spots`,
+        };
+      })
+    : GROUP_TRIPS;
 
   const cms = await getContentByCategory("page_grupos", locale);
   const heroImage = cms.grupos_hero_image || "https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=1920&q=80";
@@ -188,7 +225,7 @@ export default async function GruposPage({ params }: Props) {
           </AnimatedSection>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {GROUP_TRIPS.map((trip, index) => (
+            {trips.map((trip, index) => (
               <AnimatedSection
                 key={trip.id}
                 variant="scale-in"

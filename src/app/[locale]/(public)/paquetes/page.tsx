@@ -20,13 +20,18 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-const DURATION_MAP: Record<string, string> = {
-  Grecia: "8 días / 7 noches",
-  Italia: "7 días / 6 noches",
-  París: "8 días / 7 noches",
-  Maldivas: "7 días / 6 noches",
-  Marruecos: "8 días / 7 noches",
-  Japón: "10 días / 9 noches",
+const DURATION_DAYS: Record<string, number> = {
+  Grecia: 8,
+  Italia: 7,
+  París: 8,
+  Maldivas: 7,
+  Marruecos: 8,
+  Japón: 10,
+  Greece: 8,
+  Italy: 7,
+  Paris: 8,
+  Morocco: 8,
+  Japan: 10,
 };
 
 async function getPromotions(locale: string) {
@@ -140,11 +145,11 @@ export default async function PaquetesPage({ params }: Props) {
                               {promo.destination}
                             </span>
                           </span>
-                          {DURATION_MAP[promo.destination] && (
+                          {DURATION_DAYS[promo.destination] && (
                             <span className="inline-flex items-center gap-1.5 text-text-muted">
                               <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                               <span className="font-body text-xs font-medium uppercase tracking-wider">
-                                {DURATION_MAP[promo.destination]}
+                                {t("durationLabel", { days: DURATION_DAYS[promo.destination], nights: DURATION_DAYS[promo.destination] - 1 })}
                               </span>
                             </span>
                           )}

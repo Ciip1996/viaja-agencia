@@ -16,7 +16,7 @@ import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin
 import { cn } from "@/lib/utils/cn";
 import type { FAQ } from "@/lib/supabase/types";
 
-type FormData = Omit<FAQ, "id"> & { id?: string };
+type FormData = Omit<FAQ, "id" | "locale"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   question: "",

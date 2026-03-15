@@ -24,28 +24,36 @@ interface BlogPost {
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 async function getPost(slug: string, locale: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("locale", locale)
-    .eq("is_published", true)
-    .single();
-  return data as BlogPost | null;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("locale", locale)
+      .eq("is_published", true)
+      .single();
+    return data as BlogPost | null;
+  } catch {
+    return null;
+  }
 }
 
 async function getRelatedPosts(locale: string, excludeId: string) {
-  const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
-    .from("blog_posts")
-    .select("id, title, slug, excerpt, cover_image_url, author, published_at")
-    .eq("is_published", true)
-    .eq("locale", locale)
-    .neq("id", excludeId)
-    .order("published_at", { ascending: false })
-    .limit(3);
-  return (data as Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "cover_image_url" | "author" | "published_at">[]) ?? [];
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("id, title, slug, excerpt, cover_image_url, author, published_at")
+      .eq("is_published", true)
+      .eq("locale", locale)
+      .neq("id", excludeId)
+      .order("published_at", { ascending: false })
+      .limit(3);
+    return (data as Pick<BlogPost, "id" | "title" | "slug" | "excerpt" | "cover_image_url" | "author" | "published_at">[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props) {

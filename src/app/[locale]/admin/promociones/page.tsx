@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Promotion } from "@/lib/supabase/types";
 
-type FormData = Omit<Promotion, "id" | "created_at"> & { id?: string };
+type FormData = Omit<Promotion, "id" | "created_at" | "locale"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   title: "",

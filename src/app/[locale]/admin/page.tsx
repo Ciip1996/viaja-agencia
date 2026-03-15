@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
         supabase.from("promotions").select("*", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("packages").select("*", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("group_trips").select("*", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("blog_posts").select("*", { count: "exact", head: true }).eq("published", true),
+        supabase.from("blog_posts").select("*", { count: "exact", head: true }).eq("is_published", true),
         supabase.from("quote_requests").select("*", { count: "exact", head: true }),
         supabase.from("newsletter_subscribers").select("*", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("contact_submissions").select("*", { count: "exact", head: true }),

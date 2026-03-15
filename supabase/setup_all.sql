@@ -64,7 +64,8 @@ CREATE TABLE IF NOT EXISTS group_trips (
   current_travelers INTEGER DEFAULT 0,
   price_usd NUMERIC(10,2) NOT NULL,
   image_url TEXT,
-  is_active BOOLEAN DEFAULT true
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS events (
@@ -73,7 +74,8 @@ CREATE TABLE IF NOT EXISTS events (
   event_type TEXT NOT NULL,
   description TEXT,
   image_url TEXT,
-  is_active BOOLEAN DEFAULT true
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS blog_posts (
@@ -230,9 +232,7 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Auth can manage quote_requests') THEN
     CREATE POLICY "Auth can manage quote_requests" ON quote_requests FOR ALL TO authenticated USING (true);
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Anon can read quote_requests') THEN
-    CREATE POLICY "Anon can read quote_requests" ON quote_requests FOR SELECT TO anon USING (true);
-  END IF;
+  -- Removed: anon SELECT on quote_requests (PII leak — only authenticated users should read quotes)
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public can insert newsletter') THEN
     CREATE POLICY "Public can insert newsletter" ON newsletter_subscribers FOR INSERT TO anon WITH CHECK (true);
   END IF;
@@ -280,6 +280,9 @@ ALTER TABLE group_trips ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'e
 ALTER TABLE events ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'es';
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'es';
 ALTER TABLE packages ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'es';
+
+ALTER TABLE group_trips ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE events ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 
 -- ============================================================
 -- 6. SEED: Site Settings (Spanish)
@@ -489,16 +492,32 @@ ON CONFLICT (key, locale) DO NOTHING;
 -- ============================================================
 
 INSERT INTO site_settings (key, value, category, label, field_type, locale) VALUES
-  ('feature_tours',         'false', 'feature_flags', 'Página de Tours',              'toggle', 'es'),
-  ('feature_autos',         'false', 'feature_flags', 'Página de Renta de Autos',     'toggle', 'es'),
+  ('feature_blog',          'true',  'feature_flags', 'Blog',                         'toggle', 'es'),
+  ('feature_grupos',        'true',  'feature_flags', 'Viajes Grupales',              'toggle', 'es'),
+  ('feature_eventos',       'true',  'feature_flags', 'Eventos Especiales',           'toggle', 'es'),
+  ('feature_tours',         'false', 'feature_flags', 'Tours y Excursiones',          'toggle', 'es'),
+  ('feature_autos',         'false', 'feature_flags', 'Renta de Autos',              'toggle', 'es'),
+  ('feature_hoteles',       'true',  'feature_flags', 'Buscador de Hoteles',          'toggle', 'es'),
+  ('feature_hotel_booking', 'false', 'feature_flags', 'Botón Reservar Hoteles',       'toggle', 'es'),
   ('feature_chatbot',       'false', 'feature_flags', 'Agente Virtual (Chatbot IA)',   'toggle', 'es'),
   ('feature_instagram',     'false', 'feature_flags', 'Feed de Instagram',            'toggle', 'es'),
-  ('feature_hotel_booking', 'false', 'feature_flags', 'Botón Reservar Hoteles',       'toggle', 'es'),
-  ('feature_tours',         'false', 'feature_flags', 'Tours Page',                   'toggle', 'en'),
-  ('feature_autos',         'false', 'feature_flags', 'Car Rental Page',              'toggle', 'en'),
-  ('feature_chatbot',       'false', 'feature_flags', 'Virtual Agent (AI Chatbot)',   'toggle', 'en'),
-  ('feature_instagram',     'false', 'feature_flags', 'Instagram Feed',              'toggle', 'en'),
-  ('feature_hotel_booking', 'false', 'feature_flags', 'Hotel Booking Button',        'toggle', 'en')
+  ('feature_newsletter',    'true',  'feature_flags', 'Sección Newsletter (Home)',     'toggle', 'es'),
+  ('feature_testimonials',  'true',  'feature_flags', 'Sección Testimonios (Home)',    'toggle', 'es'),
+  ('feature_faq',           'true',  'feature_flags', 'Sección FAQ (Home)',            'toggle', 'es'),
+  ('feature_megatravel',    'true',  'feature_flags', 'Integración Megatravel',        'toggle', 'es'),
+  ('feature_blog',          'true',  'feature_flags', 'Blog',                         'toggle', 'en'),
+  ('feature_grupos',        'true',  'feature_flags', 'Group Trips',                  'toggle', 'en'),
+  ('feature_eventos',       'true',  'feature_flags', 'Special Events',               'toggle', 'en'),
+  ('feature_tours',         'false', 'feature_flags', 'Tours & Excursions',           'toggle', 'en'),
+  ('feature_autos',         'false', 'feature_flags', 'Car Rental',                   'toggle', 'en'),
+  ('feature_hoteles',       'true',  'feature_flags', 'Hotel Search',                 'toggle', 'en'),
+  ('feature_hotel_booking', 'false', 'feature_flags', 'Hotel Booking Button',         'toggle', 'en'),
+  ('feature_chatbot',       'false', 'feature_flags', 'Virtual Agent (AI Chatbot)',    'toggle', 'en'),
+  ('feature_instagram',     'false', 'feature_flags', 'Instagram Feed',               'toggle', 'en'),
+  ('feature_newsletter',    'true',  'feature_flags', 'Newsletter Section (Home)',     'toggle', 'en'),
+  ('feature_testimonials',  'true',  'feature_flags', 'Testimonials Section (Home)',   'toggle', 'en'),
+  ('feature_faq',           'true',  'feature_flags', 'FAQ Section (Home)',            'toggle', 'en'),
+  ('feature_megatravel',    'true',  'feature_flags', 'Megatravel Integration',        'toggle', 'en')
 ON CONFLICT (key, locale) DO NOTHING;
 
 -- ============================================================

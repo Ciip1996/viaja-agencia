@@ -142,7 +142,9 @@
     "defaultTag": "Testimonials",
     "defaultHeading": "What Our Travelers Say",
     "tablistAria": "Testimonials",
-    "testimonialAria": "Testimonial from {name}"
+    "testimonialAria": "Testimonial from {name}",
+    "googleReviewsCount": "Google reviews",
+    "viewAllGoogleReviews": "View all reviews on Google Maps"
   },
   "newsletter": {
     "defaultTag": "Newsletter",
@@ -201,6 +203,7 @@
     "offersTag": "Seasonal Offers",
     "offersHeading1": "Our most ",
     "offersHeading2": "popular packages",
+    "durationLabel": "{days} days / {nights} nights",
     "megatravelTag": "HOT Deals",
     "megatravelHeading1": "Travel ",
     "megatravelHeading2": "promotions",
@@ -236,7 +239,23 @@
     "ctaAlt": "Group of travelers exploring a historic city",
     "ctaHeading": "Do you have a group ready to travel?",
     "ctaDescription": "Get a no-obligation quote. We'll design an itinerary tailored to your group, no matter the size.",
-    "ctaButton": "Request Group Quote"
+    "ctaButton": "Request Group Quote",
+    "trip1Title": "Europe Express",
+    "trip1Destination": "Spain, France & Italy",
+    "trip1Duration": "12 days",
+    "trip1Spots": "8 spots available",
+    "trip2Title": "Holy Land",
+    "trip2Destination": "Israel & Jordan",
+    "trip2Duration": "10 days",
+    "trip2Spots": "12 spots available",
+    "trip3Title": "Ancient Japan",
+    "trip3Destination": "Tokyo, Kyoto & Osaka",
+    "trip3Duration": "14 days",
+    "trip3Spots": "6 spots available",
+    "trip4Title": "South Africa Safari",
+    "trip4Destination": "Cape Town & Kruger",
+    "trip4Duration": "11 days",
+    "trip4Spots": "10 spots available"
   },
   "pageEventos": {
     "metaTitle": "Special Events | Viaja Agencia",
@@ -373,6 +392,7 @@
     "labelMessage": "Message *",
     "placeholderMessage": "Tell us about the trip you dream of...",
     "submitButton": "Send Message",
+    "submitting": "Sending...",
     "mapTitle": "Viaja Agencia location on Google Maps"
   },
   "pageHoteles": {
@@ -479,7 +499,7 @@
     "expandMenu": "Expand menu",
     "administrator": "Administrator",
     "roleAdmin": "Admin",
-    "brandName": "Viaja",
+    "brandName": "Viaja Admin",
     "welcomeTitle": "Welcome to the Admin Panel",
     "welcomeSubtitle": "Manage your travel agency from here.",
     "totalPromotions": "Total Promotions",

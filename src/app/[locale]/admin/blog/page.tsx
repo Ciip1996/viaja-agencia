@@ -23,7 +23,7 @@ const TiptapEditor = dynamic(() => import("@/components/admin/TiptapEditor"), {
   ssr: false,
 });
 
-type FormData = Omit<BlogPost, "id" | "created_at"> & { id?: string };
+type FormData = Omit<BlogPost, "id" | "created_at" | "locale"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   title: "",

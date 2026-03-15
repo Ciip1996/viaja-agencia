@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { GroupTrip } from "@/lib/supabase/types";
 
-type FormData = Omit<GroupTrip, "id"> & { id?: string };
+type FormData = Omit<GroupTrip, "id" | "locale" | "created_at"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   title: "",
@@ -54,7 +54,10 @@ export default function GruposPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const { data } = await fetchWithLocale<GroupTrip>("group_trips", activeLocale);
+      const { data } = await fetchWithLocale<GroupTrip>("group_trips", activeLocale, {
+        orderBy: "departure_date",
+        ascending: true,
+      });
       setItems(data);
       setError(null);
     } catch {

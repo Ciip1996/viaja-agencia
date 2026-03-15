@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Event } from "@/lib/supabase/types";
 
-type FormData = Omit<Event, "id"> & { id?: string };
+type FormData = Omit<Event, "id" | "locale" | "created_at"> & { id?: string };
 
 const EMPTY_FORM: FormData = {
   title: "",
@@ -55,7 +55,10 @@ export default function EventosPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const { data } = await fetchWithLocale<Event>("events", activeLocale);
+      const { data } = await fetchWithLocale<Event>("events", activeLocale, {
+        orderBy: "title",
+        ascending: true,
+      });
       setItems(data);
       setError(null);
     } catch {

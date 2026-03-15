@@ -17,17 +17,19 @@ import { cn } from "@/lib/utils/cn";
 interface QuoteRequest {
   id: string;
   client_name: string;
-  email: string;
-  phone: string | null;
+  client_email: string;
+  client_phone: string | null;
   destination: string;
-  trip_type: string | null;
-  departure_date: string | null;
-  return_date: string | null;
-  travelers: number | null;
-  budget: string | null;
+  travel_type: string | null;
+  check_in: string | null;
+  check_out: string | null;
+  adults: number | null;
+  children: number | null;
+  budget_range: string | null;
   notes: string | null;
   source: string;
   status: string;
+  assigned_to: string | null;
   chat_history: unknown;
   created_at: string;
 }
@@ -232,13 +234,13 @@ export default function CotizacionesPage() {
                       {item.client_name}
                     </td>
                     <td className="px-4 py-3 text-text-muted hidden sm:table-cell max-w-[180px] truncate">
-                      {item.email}
+                      {item.client_email}
                     </td>
                     <td className="px-4 py-3 text-text-muted hidden md:table-cell max-w-[140px] truncate">
                       {item.destination}
                     </td>
                     <td className="px-4 py-3 text-text-muted hidden lg:table-cell">
-                      {item.trip_type ?? "—"}
+                      {item.travel_type ?? "—"}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <span
@@ -333,14 +335,15 @@ export default function CotizacionesPage() {
               <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <DetailField label="Cliente" value={detailItem.client_name} />
-                  <DetailField label="Email" value={detailItem.email} />
-                  <DetailField label="Teléfono" value={detailItem.phone ?? "—"} />
+                  <DetailField label="Email" value={detailItem.client_email} />
+                  <DetailField label="Teléfono" value={detailItem.client_phone ?? "—"} />
                   <DetailField label="Destino" value={detailItem.destination} />
-                  <DetailField label="Tipo de viaje" value={detailItem.trip_type ?? "—"} />
-                  <DetailField label="Viajeros" value={detailItem.travelers?.toString() ?? "—"} />
-                  <DetailField label="Fecha salida" value={detailItem.departure_date ?? "—"} />
-                  <DetailField label="Fecha regreso" value={detailItem.return_date ?? "—"} />
-                  <DetailField label="Presupuesto" value={detailItem.budget ?? "—"} />
+                  <DetailField label="Tipo de viaje" value={detailItem.travel_type ?? "—"} />
+                  <DetailField label="Adultos" value={detailItem.adults?.toString() ?? "—"} />
+                  <DetailField label="Niños" value={detailItem.children?.toString() ?? "—"} />
+                  <DetailField label="Check-in" value={detailItem.check_in ?? "—"} />
+                  <DetailField label="Check-out" value={detailItem.check_out ?? "—"} />
+                  <DetailField label="Presupuesto" value={detailItem.budget_range ?? "—"} />
                   <div>
                     <p className="text-xs font-medium text-text-muted mb-1">Fuente</p>
                     <span
