@@ -16,14 +16,9 @@ export default function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const pathnameHasLocale = routing.locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
-
-  if (pathnameHasLocale) {
-    return intlMiddleware(request);
-  }
-
-  const url = new URL(`/${routing.defaultLocale}${pathname}`, request.url);
-  return NextResponse.rewrite(url);
+  return intlMiddleware(request);
 }
+
+export const config = {
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+};

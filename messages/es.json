@@ -571,6 +571,8 @@
     "allPosts": "Todas las publicaciones",
     "noPosts": "No hay publicaciones aún",
     "noPostsHint": "Pronto compartiremos contenido increíble.",
+    "emptyTitle": "Próximamente",
+    "emptyDescription": "Estamos preparando contenido increíble para ti. ¡Vuelve pronto!",
     "backToBlog": "← Volver al Blog",
     "relatedTag": "SIGUE LEYENDO",
     "relatedHeading": "Artículos Relacionados",

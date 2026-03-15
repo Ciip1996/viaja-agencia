@@ -571,6 +571,8 @@
     "allPosts": "All posts",
     "noPosts": "No posts yet",
     "noPostsHint": "We'll be sharing amazing content soon.",
+    "emptyTitle": "Coming Soon",
+    "emptyDescription": "We're preparing amazing content for you. Stay tuned!",
     "backToBlog": "← Back to Blog",
     "relatedTag": "KEEP READING",
     "relatedHeading": "Related Articles",
