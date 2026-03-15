@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   Search,
 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Promotion } from "@/lib/supabase/types";
@@ -54,15 +54,8 @@ export default function PromocionesPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("promotions")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("created_at", { ascending: false });
-
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<Promotion>("promotions", activeLocale);
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -103,7 +96,6 @@ export default function PromocionesPage() {
     setSaving(true);
 
     try {
-      const supabase = createAdminClient();
       const payload = {
         title: form.title,
         description: form.description,
@@ -115,21 +107,9 @@ export default function PromocionesPage() {
         is_active: form.is_active,
         valid_from: form.valid_from || null,
         valid_until: form.valid_until || null,
-        locale: activeLocale,
       };
 
-      if (form.id) {
-        const { error: err } = await supabase
-          .from("promotions")
-          .update(payload)
-          .eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase
-          .from("promotions")
-          .insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("promotions", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -143,12 +123,7 @@ export default function PromocionesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase
-        .from("promotions")
-        .delete()
-        .eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("promotions", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -158,11 +133,7 @@ export default function PromocionesPage() {
 
   const toggleActive = async (id: string, current: boolean) => {
     try {
-      const supabase = createAdminClient();
-      await supabase
-        .from("promotions")
-        .update({ is_active: !current })
-        .eq("id", id);
+      await saveWithLocale("promotions", { is_active: !current }, activeLocale, id);
       setItems((prev) =>
         prev.map((i) => (i.id === id ? { ...i, is_active: !current } : i))
       );

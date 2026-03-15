@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   Search,
 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Event } from "@/lib/supabase/types";
@@ -55,14 +55,8 @@ export default function EventosPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("events")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("title", { ascending: true });
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<Event>("events", activeLocale);
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -97,23 +91,15 @@ export default function EventosPage() {
     if (!form.title || !form.event_type) return;
     setSaving(true);
     try {
-      const supabase = createAdminClient();
       const payload = {
         title: form.title,
         event_type: form.event_type,
         description: form.description,
         image_url: form.image_url,
         is_active: form.is_active,
-        locale: activeLocale,
       };
 
-      if (form.id) {
-        const { error: err } = await supabase.from("events").update(payload).eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase.from("events").insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("events", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -127,9 +113,7 @@ export default function EventosPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase.from("events").delete().eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("events", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -139,8 +123,7 @@ export default function EventosPage() {
 
   const toggleActive = async (id: string, current: boolean) => {
     try {
-      const supabase = createAdminClient();
-      await supabase.from("events").update({ is_active: !current }).eq("id", id);
+      await saveWithLocale("events", { is_active: !current }, activeLocale, id);
       setItems((prev) => prev.map((i) => (i.id === id ? { ...i, is_active: !current } : i)));
     } catch {
       /* silent */

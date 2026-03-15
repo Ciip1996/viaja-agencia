@@ -13,7 +13,7 @@ import {
   AlertTriangle,
   Search,
 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { GroupTrip } from "@/lib/supabase/types";
@@ -54,14 +54,8 @@ export default function GruposPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("group_trips")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("departure_date", { ascending: true });
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<GroupTrip>("group_trips", activeLocale);
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -101,7 +95,6 @@ export default function GruposPage() {
     if (!form.title || !form.destination || !form.departure_date || !form.return_date) return;
     setSaving(true);
     try {
-      const supabase = createAdminClient();
       const payload = {
         title: form.title,
         destination: form.destination,
@@ -113,16 +106,9 @@ export default function GruposPage() {
         price_usd: form.price_usd,
         image_url: form.image_url,
         is_active: form.is_active,
-        locale: activeLocale,
       };
 
-      if (form.id) {
-        const { error: err } = await supabase.from("group_trips").update(payload).eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase.from("group_trips").insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("group_trips", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -136,9 +122,7 @@ export default function GruposPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase.from("group_trips").delete().eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("group_trips", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -148,8 +132,7 @@ export default function GruposPage() {
 
   const toggleActive = async (id: string, current: boolean) => {
     try {
-      const supabase = createAdminClient();
-      await supabase.from("group_trips").update({ is_active: !current }).eq("id", id);
+      await saveWithLocale("group_trips", { is_active: !current }, activeLocale, id);
       setItems((prev) => prev.map((i) => (i.id === id ? { ...i, is_active: !current } : i)));
     } catch {
       /* silent */

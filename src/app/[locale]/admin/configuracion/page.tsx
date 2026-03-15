@@ -28,6 +28,7 @@ import {
   Copy,
 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale } from "@/lib/supabase/admin-query";
 
 type Setting = {
   key: string;
@@ -185,23 +186,37 @@ export default function ConfiguracionPage() {
   const fetchData = useCallback(async (locale: string) => {
     setLoading(true);
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("site_settings")
-        .select("key, value, category, label, field_type, locale")
-        .eq("locale", locale)
-        .order("category")
-        .order("key");
-      if (err) throw err;
+      const { data } = await fetchWithLocale<Setting>("site_settings", locale, {
+        select: "key, value, category, label, field_type, locale",
+        orderBy: "category",
+        ascending: true,
+      });
 
-      const settings = (data ?? []) as Setting[];
-      setAllSettings(settings);
+      setAllSettings(data);
       const vals: Record<string, string> = {};
-      settings.forEach((s) => (vals[s.key] = s.value));
+      data.forEach((s) => (vals[s.key] = s.value));
       setEditValues(vals);
       setError(null);
     } catch {
-      setError("Error al cargar la configuración. Verifica tu conexión a Supabase.");
+      try {
+        const supabase = createAdminClient();
+        const { data: raw } = await supabase.from("site_settings").select("key, value").order("key");
+        const settings = (raw ?? []).map((r: { key: string; value: string }) => ({
+          key: r.key,
+          value: r.value,
+          category: "general",
+          label: r.key,
+          field_type: "text",
+          locale: "es",
+        }));
+        setAllSettings(settings);
+        const vals: Record<string, string> = {};
+        settings.forEach((s) => (vals[s.key] = s.value));
+        setEditValues(vals);
+        setError(null);
+      } catch {
+        setError("Error al cargar la configuración. Verifica tu conexión a Supabase.");
+      }
     } finally {
       setLoading(false);
     }
@@ -236,11 +251,20 @@ export default function ConfiguracionPage() {
         updated_at: new Date().toISOString(),
       }));
 
-      const { error: err } = await supabase
-        .from("site_settings")
-        .upsert(upserts, { onConflict: "key,locale" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = await supabase.from("site_settings").upsert(upserts, { onConflict: "key,locale" }) as any;
 
-      if (err) throw err;
+      if (result.error?.code === "42703") {
+        const simpleUpserts = categorySettings.map((s) => ({
+          key: s.key,
+          value: editValues[s.key] ?? s.value,
+          updated_at: new Date().toISOString(),
+        }));
+        const { error: fbErr } = await supabase.from("site_settings").upsert(simpleUpserts, { onConflict: "key" });
+        if (fbErr) throw fbErr;
+      } else if (result.error) {
+        throw result.error;
+      }
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch {

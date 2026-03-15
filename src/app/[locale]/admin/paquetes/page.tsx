@@ -14,7 +14,7 @@ import {
   Search,
   Star,
 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { Package as PackageType } from "@/lib/supabase/types";
@@ -73,14 +73,8 @@ export default function PaquetesPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("packages")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("created_at", { ascending: false });
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<PackageType>("packages", activeLocale);
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -123,7 +117,6 @@ export default function PaquetesPage() {
     if (!form.title || !form.destination || !form.region) return;
     setSaving(true);
     try {
-      const supabase = createAdminClient();
       const payload = {
         title: form.title,
         description: form.description,
@@ -138,19 +131,8 @@ export default function PaquetesPage() {
         image_url: form.image_url,
         is_featured: form.is_featured,
         is_active: form.is_active,
-        locale: activeLocale,
       };
-
-      if (form.id) {
-        const { error: err } = await supabase
-          .from("packages")
-          .update(payload)
-          .eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase.from("packages").insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("packages", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -164,12 +146,7 @@ export default function PaquetesPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase
-        .from("packages")
-        .delete()
-        .eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("packages", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -183,11 +160,7 @@ export default function PaquetesPage() {
     current: boolean
   ) => {
     try {
-      const supabase = createAdminClient();
-      await supabase
-        .from("packages")
-        .update({ [field]: !current })
-        .eq("id", id);
+      await saveWithLocale("packages", { [field]: !current }, activeLocale, id);
       setItems((prev) =>
         prev.map((i) => (i.id === id ? { ...i, [field]: !current } : i))
       );

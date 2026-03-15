@@ -14,7 +14,7 @@ import {
   Search,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import ImageUpload from "@/components/admin/ImageUpload";
 import type { BlogPost } from "@/lib/supabase/types";
@@ -59,14 +59,8 @@ export default function BlogPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("created_at", { ascending: false });
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<BlogPost>("blog_posts", activeLocale);
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -112,8 +106,6 @@ export default function BlogPage() {
     if (!form.title || !form.slug || !form.author) return;
     setSaving(true);
     try {
-      const supabase = createAdminClient();
-
       const wasPublished = form.id
         ? items.find((i) => i.id === form.id)?.is_published ?? false
         : false;
@@ -132,16 +124,9 @@ export default function BlogPage() {
         author: form.author,
         is_published: form.is_published,
         published_at: published_at as string | null,
-        locale: activeLocale,
       };
 
-      if (form.id) {
-        const { error: err } = await supabase.from("blog_posts").update(payload).eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase.from("blog_posts").insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("blog_posts", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -155,9 +140,7 @@ export default function BlogPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase.from("blog_posts").delete().eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("blog_posts", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -167,10 +150,9 @@ export default function BlogPage() {
 
   const togglePublished = async (id: string, current: boolean) => {
     try {
-      const supabase = createAdminClient();
       const updates: Record<string, unknown> = { is_published: !current };
       if (!current) updates.published_at = new Date().toISOString();
-      await supabase.from("blog_posts").update(updates).eq("id", id);
+      await saveWithLocale("blog_posts", updates, activeLocale, id);
       setItems((prev) =>
         prev.map((i) =>
           i.id === id

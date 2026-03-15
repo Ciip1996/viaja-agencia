@@ -12,7 +12,7 @@ import {
   AlertTriangle,
   Search,
 } from "lucide-react";
-import { createAdminClient } from "@/lib/supabase/admin-client";
+import { fetchWithLocale, saveWithLocale, deleteRow } from "@/lib/supabase/admin-query";
 import { cn } from "@/lib/utils/cn";
 import type { FAQ } from "@/lib/supabase/types";
 
@@ -38,14 +38,8 @@ export default function FAQPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createAdminClient();
-      const { data, error: err } = await supabase
-        .from("faq")
-        .select("*")
-        .eq("locale", activeLocale)
-        .order("display_order", { ascending: true });
-      if (err) throw err;
-      setItems(data ?? []);
+      const { data } = await fetchWithLocale<FAQ>("faq", activeLocale, { orderBy: "display_order", ascending: true });
+      setItems(data);
       setError(null);
     } catch {
       setError("Configura Supabase para gestionar datos");
@@ -82,22 +76,14 @@ export default function FAQPage() {
     if (!form.question || !form.answer) return;
     setSaving(true);
     try {
-      const supabase = createAdminClient();
       const payload = {
         question: form.question,
         answer: form.answer,
         display_order: form.display_order,
         is_active: form.is_active,
-        locale: activeLocale,
       };
 
-      if (form.id) {
-        const { error: err } = await supabase.from("faq").update(payload).eq("id", form.id);
-        if (err) throw err;
-      } else {
-        const { error: err } = await supabase.from("faq").insert(payload);
-        if (err) throw err;
-      }
+      await saveWithLocale("faq", payload, activeLocale, form.id);
 
       setModalOpen(false);
       fetchData();
@@ -111,9 +97,7 @@ export default function FAQPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      const supabase = createAdminClient();
-      const { error: err } = await supabase.from("faq").delete().eq("id", deleteId);
-      if (err) throw err;
+      await deleteRow("faq", deleteId);
       setDeleteId(null);
       fetchData();
     } catch {
@@ -123,8 +107,7 @@ export default function FAQPage() {
 
   const toggleActive = async (id: string, current: boolean) => {
     try {
-      const supabase = createAdminClient();
-      await supabase.from("faq").update({ is_active: !current }).eq("id", id);
+      await saveWithLocale("faq", { is_active: !current }, activeLocale, id);
       setItems((prev) => prev.map((i) => (i.id === id ? { ...i, is_active: !current } : i)));
     } catch {
       /* silent */
