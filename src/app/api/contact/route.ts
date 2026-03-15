@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin-client";
+import { sendContactNotification } from "@/lib/services/email";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, tripType, message } = body;
+    const { name, email, phone, travelType, message } = body;
 
     if (!name || !email || !message) {
       return NextResponse.json(
@@ -12,9 +14,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Send email notification (e.g., via Resend, SendGrid, or Supabase Edge Function)
-    // TODO: Store in Supabase contacts table
-    console.log("Contact form submission:", { name, email, phone, tripType, message });
+    const supabase = createAdminClient();
+    const { error } = await supabase.from("contact_submissions").insert({
+      name,
+      email,
+      phone: phone || null,
+      travel_type: travelType || null,
+      message,
+    });
+
+    if (error) {
+      console.error("Contact DB error:", error);
+    }
+
+    await sendContactNotification({ name, email, phone, travelType, message });
 
     return NextResponse.json({
       success: true,
@@ -22,9 +35,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Contact form error:", error);
-    return NextResponse.json(
-      { error: "Error enviando mensaje" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error enviando mensaje" }, { status: 500 });
   }
 }

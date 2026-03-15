@@ -1,4 +1,4 @@
-import type { Promotion, Destination, Testimonial, FAQ } from "@/lib/supabase/types";
+import type { Promotion, Destination, FAQ } from "@/lib/supabase/types";
 
 export const promotions: Promotion[] = [
   {
@@ -8,7 +8,7 @@ export const promotions: Promotion[] = [
     destination: "Grecia",
     price_usd: 7500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800&q=80",
+    image_url: "/images/site/grecia.jpeg",
     badge: "HOT",
     is_active: true,
     valid_from: null,
@@ -22,7 +22,7 @@ export const promotions: Promotion[] = [
     destination: "Italia",
     price_usd: 5500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80",
+    image_url: "/images/site/italia.jpeg",
     badge: null,
     is_active: true,
     valid_from: null,
@@ -36,7 +36,7 @@ export const promotions: Promotion[] = [
     destination: "París",
     price_usd: 7500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+    image_url: "/images/site/paris.jpeg",
     badge: "HOT",
     is_active: true,
     valid_from: null,
@@ -50,7 +50,7 @@ export const promotions: Promotion[] = [
     destination: "Maldivas",
     price_usd: 7500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=800&q=80",
+    image_url: "/images/site/maldivas.jpeg",
     badge: "Premium",
     is_active: true,
     valid_from: null,
@@ -64,7 +64,7 @@ export const promotions: Promotion[] = [
     destination: "Marruecos",
     price_usd: 5500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?w=800&q=80",
+    image_url: "/images/site/marruecos.jpeg",
     badge: null,
     is_active: true,
     valid_from: null,
@@ -78,7 +78,7 @@ export const promotions: Promotion[] = [
     destination: "Japón",
     price_usd: 7500,
     currency: "USD",
-    image_url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
+    image_url: "/images/site/japon.jpeg",
     badge: "HOT",
     is_active: true,
     valid_from: null,
@@ -102,41 +102,8 @@ export const destinations: Destination[] = [
   { id: "12", name: "Cruceros", region: "Cruceros", description: "Navega por los mares del mundo", hero_image_url: "https://images.unsplash.com/photo-1548574505-5e239809ee19?w=800&q=80", gallery: null, practical_info: null, display_order: 12, is_active: true },
 ];
 
-export const testimonials: Testimonial[] = [
-  {
-    id: "1",
-    client_name: "María González",
-    client_photo_url: null,
-    trip_destination: "Grecia",
-    review_text: "Ya necesitaba un descanso, y la asesora de Viaja me ayudó a organizar todo para no tener que estresarme más. Volveré con ellos por su excelente atención, asesoría y precios.",
-    rating: 5,
-    is_active: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    client_name: "Roberto Hernández",
-    client_photo_url: null,
-    trip_destination: "Orlando",
-    review_text: "Los mejores. Me ayudaron a organizar mi viaje a Disney de tal forma que no tuve problemas, y pude prevenirme a tiempo en todo. La pasé genial y se convirtió en una excelente experiencia.",
-    rating: 5,
-    is_active: true,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    client_name: "Laura Martínez",
-    client_photo_url: null,
-    trip_destination: "Japón",
-    review_text: "Desde hace tiempo que deseaba un viaje diferente. Les platiqué lo que quería y me entendieron a la perfección, me dieron opciones y sugerencias. Ya estoy planeando el siguiente viaje.",
-    rating: 5,
-    is_active: true,
-    created_at: new Date().toISOString(),
-  },
-];
-
 export const faqs: FAQ[] = [
-  { id: "1", question: "¿Cómo puedo comenzar a planificar mi viaje con Viaja Agencia?", answer: "Es muy sencillo. Puedes contactarnos por teléfono al 477 779 0610, por WhatsApp, por correo electrónico a info@viajaagencia.com.mx o visitarnos en nuestras oficinas en León, Guanajuato. Uno de nuestros asesores te atenderá de forma personalizada.", display_order: 1, is_active: true },
+  { id: "1", question: "¿Cómo puedo comenzar a planificar mi viaje con Viaja Agencia?", answer: "Es muy sencillo. Puedes contactarnos por teléfono al 477 779 0610, por WhatsApp, por correo electrónico a reservaciones@viajaagencia.com.mx o visitarnos en nuestras oficinas en León, Guanajuato. Uno de nuestros asesores te atenderá de forma personalizada.", display_order: 1, is_active: true },
   { id: "2", question: "¿En qué destinos se especializan?", answer: "Contamos con más de 20 años de experiencia ofreciendo viajes a todo el mundo. Nos especializamos en Europa, Asia, Medio Oriente, el Caribe y destinos nacionales.", display_order: 2, is_active: true },
   { id: "3", question: "¿Pueden ayudarme con viajes grupales?", answer: "Por supuesto. Organizamos viajes grupales para familias, amigos, empresas y grupos especiales. Manejamos toda la logística.", display_order: 3, is_active: true },
   { id: "4", question: "¿Qué medidas de seguridad tienen durante el viaje?", answer: "Trabajamos únicamente con proveedores certificados y seguros de viaje internacionales. Además, ofrecemos asistencia 24/7 durante tu viaje.", display_order: 4, is_active: true },

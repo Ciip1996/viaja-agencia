@@ -14,11 +14,19 @@ export async function GET(request: NextRequest) {
 
   try {
     const results = await searchHotels(params);
-    return NextResponse.json({ results, provider: "hotelbeds" });
+    return NextResponse.json(
+      { results, provider: "hotelbeds" },
+      {
+        headers: {
+          "Cache-Control":
+            "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Hotel search error:", error);
     return NextResponse.json(
-      { error: "Error buscando hoteles" },
+      { error: "Error buscando hoteles", results: [] },
       { status: 500 }
     );
   }

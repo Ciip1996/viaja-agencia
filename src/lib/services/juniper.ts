@@ -21,6 +21,7 @@ function getConfig(): JuniperConfig {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function buildAuthHeaders(): Record<string, string> {
   const { apiKey, secret } = getConfig();
   return {
@@ -152,10 +153,6 @@ export async function getStaticData(): Promise<StaticDataResult> {
 
   // TODO: Implement live Juniper static data fetch
   // POST {baseUrl}/AvailStaticDataRQ (XML envelope with credentials)
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   return { destinations: [], productTypes: [] };
 }
 
@@ -172,11 +169,6 @@ export async function searchAvailability(
 
   // TODO: Implement live Juniper availability search
   // POST {baseUrl}/HotelAvailRQ
-  // XML body with DateRange, Occupancy, Destination
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   void params;
   return mockHotels();
 }
@@ -190,10 +182,6 @@ export async function searchTours(
 
   // TODO: Implement live Juniper activity search
   // POST {baseUrl}/ActivityAvailRQ
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   void params;
   return mockTours();
 }
@@ -207,10 +195,6 @@ export async function searchTransfers(
 
   // TODO: Implement live Juniper transfer search
   // POST {baseUrl}/TransferAvailRQ
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   void params;
   return mockTransfers();
 }
@@ -242,11 +226,6 @@ export async function checkRate(
 
   // TODO: Implement live Juniper rate check
   // POST {baseUrl}/HotelValuationRQ
-  // XML body with RatePlanCode
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   return {
     ratePlanCode,
     totalPrice: 0,
@@ -275,11 +254,6 @@ export async function confirmBooking(
 
   // TODO: Implement live Juniper booking confirmation
   // POST {baseUrl}/HotelBookingRQ
-  // XML body with Holder, Rooms, RatePlanCode
-  const { baseUrl } = getConfig();
-  const _headers = buildAuthHeaders();
-
-  void baseUrl;
   void params;
   return {
     confirmationId: `JP-${Date.now()}`,

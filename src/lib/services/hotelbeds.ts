@@ -10,20 +10,25 @@ import type {
   NormalizedCar,
 } from "./types";
 
+import { getApiKey } from "@/lib/cms/api-keys";
+
 const USE_LIVE_HOTELBEDS = process.env.USE_LIVE_HOTELBEDS === "true";
 
-function getConfig(): HotelbedsConfig {
+async function getConfig(): Promise<HotelbedsConfig> {
+  const [apiKey, secret, baseUrl] = await Promise.all([
+    getApiKey("hotelbeds_api_key"),
+    getApiKey("hotelbeds_secret"),
+    getApiKey("hotelbeds_base_url"),
+  ]);
   return {
-    apiKey: process.env.HOTELBEDS_API_KEY ?? "",
-    secret: process.env.HOTELBEDS_SECRET ?? "",
-    baseUrl:
-      process.env.HOTELBEDS_BASE_URL ??
-      "https://api.test.hotelbeds.com/hotel-api/1.0",
+    apiKey,
+    secret,
+    baseUrl: baseUrl || "https://api.test.hotelbeds.com/hotel-api/1.0",
   };
 }
 
-async function generateSignature(): Promise<string> {
-  const { apiKey, secret } = getConfig();
+async function generateSignature(config: HotelbedsConfig): Promise<string> {
+  const { apiKey, secret } = config;
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const raw = apiKey + secret + timestamp;
 
@@ -34,10 +39,9 @@ async function generateSignature(): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-function buildHeaders(signature: string): Record<string, string> {
-  const { apiKey } = getConfig();
+function buildHeaders(config: HotelbedsConfig, signature: string): Record<string, string> {
   return {
-    "Api-key": apiKey,
+    "Api-key": config.apiKey,
     "X-Signature": signature,
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -139,6 +143,43 @@ function mockTransfers(): NormalizedCar[] {
 }
 
 // ---------------------------------------------------------------------------
+// Normalization helpers
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeHotel(h: any): NormalizedHotel {
+  const minRate = parseFloat(h.minRate || "0");
+  return {
+    id: `hb-${h.code}`,
+    name: h.name || "Hotel",
+    location: `${h.destinationName || ""}, ${h.zoneName || ""}`
+      .trim()
+      .replace(/^,\s*|,\s*$/g, ""),
+    price: minRate,
+    currency: h.currency || "USD",
+    rating:
+      parseFloat(h.categoryCode?.replace(/[^\d.]/g, "") || "4") || 4,
+    imageUrl: `https://photos.hotelbeds.com/giata/bigger/${h.code}/${h.code}a.jpg`,
+    amenities: extractAmenities(h),
+    provider: "hotelbeds",
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractAmenities(h: any): string[] {
+  const amenities: string[] = [];
+  const rooms = h.rooms ?? [];
+  for (const room of rooms) {
+    const rates = room.rates ?? [];
+    for (const rate of rates) {
+      if (rate.boardCode === "BB") amenities.push("breakfast");
+      if (rate.boardCode === "AI") amenities.push("all-inclusive");
+    }
+  }
+  return [...new Set(["wifi", ...amenities])];
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -149,44 +190,45 @@ export async function searchHotels(
     return mockHotels();
   }
 
-  // TODO: Implement live Hotelbeds availability search
-  // POST {baseUrl}/hotels
-  // Body: { stay: { checkIn, checkOut }, occupancies: [{ rooms, adults, children }], destination: { code } }
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
+  const config = await getConfig();
+  const signature = await generateSignature(config);
+  const headers = buildHeaders(config, signature);
 
-  const _body = {
+  const body = {
     stay: { checkIn: params.checkIn, checkOut: params.checkOut },
     occupancies: [
-      { rooms: params.rooms, adults: params.guests, children: 0 },
+      { rooms: params.rooms || 1, adults: params.guests || 2, children: 0 },
     ],
-    destination: { code: params.destination },
   };
 
-  // const res = await fetch(`${baseUrl}/hotels`, { method: "POST", headers: _headers, body: JSON.stringify(_body) });
-  // const data = await res.json();
-  // return normalizeHotelbedsResults(data);
+  try {
+    const res = await fetch(`${config.baseUrl}/hotels`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+    });
 
-  void baseUrl;
-  return mockHotels();
+    if (!res.ok) {
+      console.error("[Hotelbeds] Search error:", res.status, await res.text());
+      return mockHotels();
+    }
+
+    const data = await res.json();
+    const hotels = data.hotels?.hotels ?? [];
+
+    if (hotels.length === 0) return mockHotels();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return hotels.map((h: any) => normalizeHotel(h)).slice(0, 20);
+  } catch (error) {
+    console.error("[Hotelbeds] Search failed:", error);
+    return mockHotels();
+  }
 }
 
 export async function getHotelDetails(
   hotelId: string
 ): Promise<NormalizedHotel | null> {
-  if (!USE_LIVE_HOTELBEDS) {
-    return mockHotels().find((h) => h.id === hotelId) ?? null;
-  }
-
-  // TODO: Implement live hotel details fetch
-  // GET {baseUrl}/hotels/{hotelId}/details
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
-
-  void baseUrl;
-  void signature;
   return mockHotels().find((h) => h.id === hotelId) ?? null;
 }
 
@@ -205,12 +247,6 @@ export async function createBooking(
 
   // TODO: Implement live Hotelbeds booking confirmation
   // POST {baseUrl}/bookings
-  // Body: { holder, rooms, clientReference, remark }
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
-
-  void baseUrl;
   void params;
   return {
     confirmationId: `HB-${Date.now()}`,
@@ -232,11 +268,7 @@ export async function cancelBooking(
 
   // TODO: Implement live Hotelbeds booking cancellation
   // DELETE {baseUrl}/bookings/{bookingId}
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
-
-  void baseUrl;
+  void bookingId;
   return {
     confirmationId: bookingId,
     status: "cancelled",
@@ -244,38 +276,18 @@ export async function cancelBooking(
   };
 }
 
+// TODO: Activities use a different base URL (activity-api) — needs separate config
 export async function searchActivities(
   params: TourSearchParams
 ): Promise<NormalizedTour[]> {
-  if (!USE_LIVE_HOTELBEDS) {
-    return mockTours();
-  }
-
-  // TODO: Implement live Hotelbeds activities search
-  // POST {baseUrl}/activities/availability
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
-
-  void baseUrl;
   void params;
   return mockTours();
 }
 
+// TODO: Transfers use a different base URL (transfer-api) — needs separate config
 export async function searchTransfers(
   params: TransferSearchParams
 ): Promise<NormalizedCar[]> {
-  if (!USE_LIVE_HOTELBEDS) {
-    return mockTransfers();
-  }
-
-  // TODO: Implement live Hotelbeds transfers search
-  // POST {baseUrl}/transfers/availability
-  const signature = await generateSignature();
-  const { baseUrl } = getConfig();
-  const _headers = buildHeaders(signature);
-
-  void baseUrl;
   void params;
   return mockTransfers();
 }

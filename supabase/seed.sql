@@ -40,13 +40,6 @@ INSERT INTO promotions (title, description, destination, price_usd, badge, image
   ('Japón Imperial', 'Tokio, Kioto y Osaka. 10 días descubriendo la perfecta armonía entre tradición milenaria y tecnología de vanguardia.', 'Japón', 7500, 'HOT', 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80')
 ON CONFLICT DO NOTHING;
 
--- Testimonials
-INSERT INTO testimonials (client_name, trip_destination, review_text, rating) VALUES
-  ('María González', 'Grecia', 'Ya necesitaba un descanso, y la asesora de Viaja me ayudó a organizar todo para no tener que estresarme más. Volveré con ellos por su excelente atención, asesoría y precios.', 5),
-  ('Roberto Hernández', 'Orlando', 'Los mejores. Me ayudaron a organizar mi viaje a Disney de tal forma que no tuve problemas, y pude prevenirme a tiempo en todo. La pasé genial y se convirtió en una excelente experiencia.', 5),
-  ('Laura Martínez', 'Japón', 'Desde hace tiempo que deseaba un viaje diferente. Les platiqué lo que quería y me entendieron a la perfección, me dieron opciones y sugerencias. Ya estoy planeando el siguiente viaje.', 5)
-ON CONFLICT DO NOTHING;
-
 -- FAQ
 INSERT INTO faq (question, answer, display_order) VALUES
   ('¿Cómo puedo comenzar a planificar mi viaje con Viaja Agencia?', 'Es muy sencillo. Puedes contactarnos por teléfono al 477 779 0610, por WhatsApp, por correo electrónico a info@viajaagencia.com.mx o visitarnos en nuestras oficinas en León, Guanajuato. Uno de nuestros asesores te atenderá de forma personalizada para diseñar el viaje perfecto para ti.', 1),

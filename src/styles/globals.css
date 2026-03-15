@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0C4A6E;
-  --color-primary-light: #0E6FA0;
-  --color-secondary: #0EA5E9;
-  --color-secondary-light: #38BDF8;
-  --color-accent: #D4A574;
-  --color-accent-light: #E4C5A0;
-  --color-accent-dark: #B8885A;
-  --color-background: #FAFAF9;
-  --color-background-alt: #F5F5F4;
+  --color-primary: #062D97;
+  --color-primary-light: #0E3DB8;
+  --color-secondary: #2667FF;
+  --color-secondary-light: #188bf6;
+  --color-accent: #1DCEC8;
+  --color-accent-light: #4DE8E2;
+  --color-accent-dark: #008491;
+  --color-background: #FAFBFF;
+  --color-background-alt: #EFF4FF;
   --color-surface: #FFFFFF;
-  --color-text: #1C1917;
-  --color-text-muted: #78716C;
-  --color-text-light: #A8A29E;
-  --color-border: #E7E5E4;
-  --color-border-light: #F5F5F4;
+  --color-text: #35322C;
+  --color-text-muted: #6B7280;
+  --color-text-light: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-border-light: #F4FAFE;
   --color-success: #059669;
   --color-warning: #D97706;
   --color-error: #DC2626;
+  --color-cobalt: #155eef;
+  --color-navy: #042066;
+  --color-navy-deep: #001f72;
 
-  --font-heading: "Cormorant", serif;
-  --font-body: "Montserrat", sans-serif;
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Outfit", sans-serif;
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -29,9 +32,9 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
 
-  --shadow-glass: 0 8px 32px rgba(12, 74, 110, 0.08);
-  --shadow-elevated: 0 20px 60px rgba(12, 74, 110, 0.12);
-  --shadow-card: 0 4px 16px rgba(12, 74, 110, 0.06);
+  --shadow-glass: 0 8px 32px rgba(6, 45, 151, 0.08);
+  --shadow-elevated: 0 20px 60px rgba(6, 45, 151, 0.12);
+  --shadow-card: 0 4px 16px rgba(6, 45, 151, 0.06);
 }
 
 @layer base {
@@ -75,7 +78,7 @@
   }
 
   .glass-dark {
-    background: rgba(12, 74, 110, 0.85);
+    background: rgba(6, 45, 151, 0.85);
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -83,16 +86,16 @@
 
   .aurora-bg {
     background: 
-      radial-gradient(ellipse at 20% 50%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(212, 165, 116, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 80%, rgba(12, 74, 110, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 20% 50%, rgba(38, 103, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(29, 206, 200, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(6, 45, 151, 0.03) 0%, transparent 50%),
       var(--color-background);
   }
 
   .aurora-section {
     background: 
-      radial-gradient(ellipse at 0% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
-      radial-gradient(ellipse at 100% 0%, rgba(212, 165, 116, 0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at 0% 50%, rgba(38, 103, 255, 0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 0%, rgba(29, 206, 200, 0.08) 0%, transparent 50%),
       linear-gradient(180deg, var(--color-background) 0%, var(--color-background-alt) 100%);
   }
 
@@ -103,7 +106,7 @@
     background-clip: text;
   }
 
-  .text-gradient-gold {
+  .text-gradient-accent {
     background: linear-gradient(135deg, var(--color-accent-dark) 0%, var(--color-accent) 50%, var(--color-accent-light) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

@@ -141,38 +141,6 @@ export interface Database {
           is_active?: boolean;
         };
       };
-      testimonials: {
-        Row: {
-          id: string;
-          client_name: string;
-          client_photo_url: string | null;
-          trip_destination: string;
-          review_text: string;
-          rating: number;
-          is_active: boolean;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          client_name: string;
-          client_photo_url?: string | null;
-          trip_destination: string;
-          review_text: string;
-          rating?: number;
-          is_active?: boolean;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          client_name?: string;
-          client_photo_url?: string | null;
-          trip_destination?: string;
-          review_text?: string;
-          rating?: number;
-          is_active?: boolean;
-          created_at?: string;
-        };
-      };
       group_trips: {
         Row: {
           id: string;
@@ -325,7 +293,6 @@ export interface Database {
 export type Promotion = Database["public"]["Tables"]["promotions"]["Row"];
 export type Package = Database["public"]["Tables"]["packages"]["Row"];
 export type Destination = Database["public"]["Tables"]["destinations"]["Row"];
-export type Testimonial = Database["public"]["Tables"]["testimonials"]["Row"];
 export type GroupTrip = Database["public"]["Tables"]["group_trips"]["Row"];
 export type Event = Database["public"]["Tables"]["events"]["Row"];
 export type BlogPost = Database["public"]["Tables"]["blog_posts"]["Row"];

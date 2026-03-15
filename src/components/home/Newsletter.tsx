@@ -3,53 +3,81 @@
 import { useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, CheckCircle } from "lucide-react";
+import Image from "next/image";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { cn } from "@/lib/utils/cn";
+import { useTranslations } from "next-intl";
 
-export default function Newsletter() {
+type NewsletterProps = {
+  content?: Record<string, string>;
+};
+
+export default function Newsletter({ content = {} }: NewsletterProps) {
+  const t = useTranslations("newsletter");
+  const tag = content.newsletter_tag || t("defaultTag");
+  const heading = content.newsletter_heading || t("defaultHeading");
+  const description = content.newsletter_description || t("defaultDescription");
+
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim()) return;
-    setSubmitted(true);
-    setEmail("");
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Error al suscribirse");
+        return;
+      }
+
+      setSubmitted(true);
+      setEmail("");
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
+      <Image
+        src="/images/site/newsletter-bg.png"
+        alt=""
+        fill
+        className="absolute inset-0 -z-20 object-cover"
+        priority={false}
+      />
       <div
         className="absolute inset-0 -z-10"
         style={{
-          background:
-            "linear-gradient(135deg, #0C4A6E 0%, #0E6FA0 40%, #0EA5E9 70%, #D4A574 100%)",
+          background: "linear-gradient(135deg, rgba(6,45,151,0.85) 0%, rgba(38,103,255,0.75) 50%, rgba(29,206,200,0.65) 100%)",
         }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 opacity-30"
-        style={{
-          background:
-            "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 50%), " +
-            "radial-gradient(ellipse at 70% 80%, rgba(212,165,116,0.2) 0%, transparent 50%)",
-        }}
-        aria-hidden="true"
       />
 
       <div className="container-custom relative">
         <div className="mx-auto max-w-2xl text-center">
           <AnimatedSection variant="fade-up">
             <p className="mb-3 text-sm font-semibold tracking-widest uppercase text-white/70">
-              Newsletter
+              {tag}
             </p>
-            <h2 className="mb-6 font-heading text-white">
-              Recibe las Mejores Ofertas
-            </h2>
+            <h2 className="mb-6 font-heading text-white">{heading}</h2>
             <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-white/80">
-              Suscribete a nuestro newsletter y se el primero en conocer
-              promociones exclusivas y destinos de temporada.
+              {description}
             </p>
           </AnimatedSection>
 
@@ -68,14 +96,14 @@ export default function Newsletter() {
                     <CheckCircle size={28} className="text-white" />
                   </div>
                   <p className="text-xl font-semibold text-white">
-                    Gracias! Te mantendremos informado.
+                    {t("successMessage")}
                   </p>
                   <button
                     type="button"
                     onClick={() => setSubmitted(false)}
                     className="mt-2 cursor-pointer text-sm text-white/60 underline underline-offset-4 transition-colors hover:text-white/90"
                   >
-                    Suscribir otro correo
+                    {t("subscribeAnother")}
                   </button>
                 </motion.div>
               ) : (
@@ -88,20 +116,16 @@ export default function Newsletter() {
                   onSubmit={handleSubmit}
                   className="mx-auto max-w-lg"
                 >
-                  <div
-                    className={cn(
-                      "flex flex-col gap-3 rounded-2xl p-2 transition-shadow duration-300 sm:flex-row sm:gap-0 sm:rounded-full sm:bg-white/15 sm:backdrop-blur-md",
-                      focused && "shadow-[0_0_0_2px_rgba(212,165,116,0.5)]",
-                    )}
-                  >
-                    <label htmlFor="newsletter-email" className="sr-only">
-                      Correo electronico
-                    </label>
+                  <div className={cn(
+                    "flex flex-col gap-3 rounded-2xl p-2 transition-shadow duration-300 sm:flex-row sm:gap-0 sm:rounded-full sm:bg-white/15 sm:backdrop-blur-md",
+                    focused && "shadow-[0_0_0_2px_rgba(29,206,200,0.5)]",
+                  )}>
+                    <label htmlFor="newsletter-email" className="sr-only">{t("emailLabel")}</label>
                     <input
                       id="newsletter-email"
                       type="email"
                       required
-                      placeholder="tu@correo.com"
+                      placeholder={t("emailPlaceholder")}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onFocus={() => setFocused(true)}
@@ -110,17 +134,18 @@ export default function Newsletter() {
                     />
                     <button
                       type="submit"
-                      className="group flex cursor-pointer items-center justify-center gap-2 rounded-full bg-accent px-8 py-4 font-semibold text-white transition-all duration-200 hover:bg-accent-dark hover:shadow-lg active:scale-[0.98]"
+                      disabled={loading}
+                      className="group flex cursor-pointer items-center justify-center gap-2 rounded-full bg-accent px-8 py-4 font-semibold text-white transition-all duration-200 hover:bg-accent-dark hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Suscribirme
-                      <Send
-                        size={16}
-                        className="transition-transform duration-200 group-hover:translate-x-0.5"
-                      />
+                      {loading ? t("sending") ?? "Enviando..." : t("submitButton")}
+                      <Send size={16} className={cn("transition-transform duration-200 group-hover:translate-x-0.5", loading && "animate-pulse")} />
                     </button>
                   </div>
+                  {error && (
+                    <p className="mt-3 text-sm text-red-300">{error}</p>
+                  )}
                   <p className="mt-4 text-xs text-white/50">
-                    Sin spam. Puedes darte de baja en cualquier momento.
+                    {t("disclaimer")}
                   </p>
                 </motion.form>
               )}

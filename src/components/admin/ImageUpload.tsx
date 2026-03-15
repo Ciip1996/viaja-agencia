@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils/cn";
 
@@ -70,6 +70,7 @@ export default function ImageUpload({
   if (value) {
     return (
       <div className="relative group w-full rounded-xl overflow-hidden border border-border bg-background">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={value}
           alt="Preview"

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { faqs } from "@/lib/data/mock-data";
+import { faqs as mockFaqs } from "@/lib/data/mock-data";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { cn } from "@/lib/utils/cn";
+import type { FAQ as FAQType } from "@/lib/supabase/types";
+import { useTranslations } from "next-intl";
 
 function FAQItem({
   question,
@@ -73,12 +75,20 @@ function FAQItem({
   );
 }
 
-export default function FAQ() {
-  const [openId, setOpenId] = useState<string | null>(null);
+type FAQProps = {
+  content?: Record<string, string>;
+  faqs?: FAQType[];
+};
 
-  const sortedFaqs = [...faqs].sort(
-    (a, b) => a.display_order - b.display_order,
-  );
+export default function FAQ({ content = {}, faqs }: FAQProps) {
+  const t = useTranslations("faq");
+  const tag = content.faq_tag || t("defaultTag");
+  const heading = content.faq_heading || t("defaultHeading");
+
+  const items = faqs && faqs.length > 0 ? faqs : mockFaqs;
+  const sortedFaqs = [...items].sort((a, b) => a.display_order - b.display_order);
+
+  const [openId, setOpenId] = useState<string | null>(null);
 
   function toggle(id: string) {
     setOpenId((prev) => (prev === id ? null : id));
@@ -89,9 +99,9 @@ export default function FAQ() {
       <div className="container-custom">
         <AnimatedSection variant="fade-up" className="mb-16 text-center">
           <p className="mb-3 text-sm font-semibold tracking-widest uppercase text-accent">
-            Ayuda
+            {tag}
           </p>
-          <h2 className="text-gradient mb-4">Preguntas Frecuentes</h2>
+          <h2 className="text-gradient mb-4">{heading}</h2>
           <div className="mx-auto h-1 w-16 rounded-full bg-accent" />
         </AnimatedSection>
 
