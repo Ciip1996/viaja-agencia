@@ -11,16 +11,14 @@ import { getContentByCategory } from "@/lib/cms/content";
 import { getFeatureFlags } from "@/lib/cms/feature-flags";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { fetchGoogleReviews } from "@/lib/services/google-places";
+import { buildPageMetadata, buildFaqJsonLd, buildWebSiteJsonLd } from "@/lib/utils/seo";
 
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
-  return {
-    title: t("homeTitle"),
-    description: t("homeDescription"),
-  };
+  return buildPageMetadata(locale, "/", t("homeTitle"), t("homeDescription"));
 }
 
 async function getPromotions(locale: string) {
@@ -130,6 +128,7 @@ export default async function HomePage({ params }: Props) {
 
   const tMeta = await getTranslations({ locale, namespace: "metadata" });
   const jsonLd = buildJsonLd(locale, tMeta("homeDescription"));
+  const webSiteJsonLd = buildWebSiteJsonLd(locale as "es" | "en");
 
   const [
     heroContent,
@@ -161,12 +160,32 @@ export default async function HomePage({ params }: Props) {
     getFeatureFlags(),
   ]);
 
+  const faqJsonLd =
+    faqs.length > 0
+      ? buildFaqJsonLd(
+          faqs.map((f: { question: string; answer: string }) => ({
+            question: f.question,
+            answer: f.answer,
+          }))
+        )
+      : null;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+      />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
       <Hero content={heroContent} />
       <HotDeals content={offersContent} promotions={promotions} />
       <FeaturedDestinations content={destContent} destinations={destinations} />

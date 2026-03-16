@@ -8,16 +8,14 @@ import { formatPrice } from "@/lib/utils/format";
 import { getContentByCategory } from "@/lib/cms/content";
 import { getMegatravelOfertasUrl } from "@/lib/utils/megatravel";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { buildPageMetadata, buildBreadcrumbJsonLd, buildItemListJsonLd, BASE_URL } from "@/lib/utils/seo";
 
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pagePaquetes" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
+  return buildPageMetadata(locale, "/paquetes", t("metaTitle"), t("metaDescription"));
 }
 
 const DURATION_DAYS: Record<string, number> = {
@@ -59,8 +57,32 @@ export default async function PaquetesPage({ params }: Props) {
   const heroDescription = cms.paquetes_hero_description || t("heroDescription");
   const megatravelUrl = cms.paquetes_megatravel_url || getMegatravelOfertasUrl();
   const promotions = dbPromos ?? mockPromotions;
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: t("metaTitle"), url: `${BASE_URL}${locale === "es" ? "/paquetes" : `/${locale}/paquetes`}` },
+  ]);
+
+  const itemListJsonLd = buildItemListJsonLd(
+    t("metaTitle"),
+    promotions.map((promo) => ({
+      name: promo.title,
+      url: `${BASE_URL}${locale === "es" ? "" : `/${locale}`}/contacto`,
+      image: promo.image_url ?? undefined,
+      description: promo.description ?? undefined,
+    }))
+  );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <Image

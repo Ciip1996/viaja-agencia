@@ -17,6 +17,7 @@ import { formatPrice } from "@/lib/utils/format";
 import { getContentByCategory } from "@/lib/cms/content";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { GroupTrip } from "@/lib/supabase/types";
+import { buildPageMetadata, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/utils/seo";
 
 async function getGroupTrips(locale: string): Promise<GroupTrip[] | null> {
   try {
@@ -38,10 +39,7 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pageGrupos" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
+  return buildPageMetadata(locale, "/grupos", t("metaTitle"), t("metaDescription"));
 }
 
 const BENEFIT_ICONS = [Wallet, ShieldCheck, CalendarCheck, PartyPopper];
@@ -128,8 +126,17 @@ export default async function GruposPage({ params }: Props) {
     { icon: BENEFIT_ICONS[3], title: t("benefit4Title"), description: t("benefit4Desc") },
   ];
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: t("metaTitle"), url: `${BASE_URL}${locale === "es" ? "/grupos" : `/${locale}/grupos`}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <Image

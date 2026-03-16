@@ -23,6 +23,7 @@ export interface Database {
           valid_from: string | null;
           valid_until: string | null;
           locale: string;
+          translation_group_id?: string;
           created_at: string;
         };
         Insert: {
@@ -38,6 +39,7 @@ export interface Database {
           valid_from?: string | null;
           valid_until?: string | null;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
         Update: {
@@ -53,6 +55,7 @@ export interface Database {
           valid_from?: string | null;
           valid_until?: string | null;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
       };
@@ -73,6 +76,7 @@ export interface Database {
           is_featured: boolean;
           is_active: boolean;
           locale: string;
+          translation_group_id?: string;
           created_at: string;
         };
         Insert: {
@@ -91,6 +95,7 @@ export interface Database {
           is_featured?: boolean;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
         Update: {
@@ -109,6 +114,7 @@ export interface Database {
           is_featured?: boolean;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
       };
@@ -124,6 +130,7 @@ export interface Database {
           display_order: number;
           is_active: boolean;
           locale: string;
+          translation_group_id?: string;
         };
         Insert: {
           id?: string;
@@ -136,6 +143,7 @@ export interface Database {
           display_order?: number;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
         };
         Update: {
           id?: string;
@@ -148,6 +156,7 @@ export interface Database {
           display_order?: number;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
         };
       };
       group_trips: {
@@ -164,6 +173,7 @@ export interface Database {
           image_url: string | null;
           is_active: boolean;
           locale: string;
+          translation_group_id?: string;
           created_at: string;
         };
         Insert: {
@@ -179,6 +189,7 @@ export interface Database {
           image_url?: string | null;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
         Update: {
@@ -194,6 +205,7 @@ export interface Database {
           image_url?: string | null;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
       };
@@ -206,6 +218,7 @@ export interface Database {
           image_url: string | null;
           is_active: boolean;
           locale: string;
+          translation_group_id?: string;
           created_at: string;
         };
         Insert: {
@@ -216,6 +229,7 @@ export interface Database {
           image_url?: string | null;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
         Update: {
@@ -226,6 +240,7 @@ export interface Database {
           image_url?: string | null;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
       };
@@ -241,6 +256,7 @@ export interface Database {
           is_published: boolean;
           published_at: string | null;
           locale: string;
+          translation_group_id?: string;
           created_at: string;
         };
         Insert: {
@@ -254,6 +270,7 @@ export interface Database {
           is_published?: boolean;
           published_at?: string | null;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
         Update: {
@@ -267,6 +284,7 @@ export interface Database {
           is_published?: boolean;
           published_at?: string | null;
           locale?: string;
+          translation_group_id?: string;
           created_at?: string;
         };
       };
@@ -278,6 +296,7 @@ export interface Database {
           display_order: number;
           is_active: boolean;
           locale: string;
+          translation_group_id?: string;
         };
         Insert: {
           id?: string;
@@ -286,6 +305,7 @@ export interface Database {
           display_order?: number;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
         };
         Update: {
           id?: string;
@@ -294,6 +314,7 @@ export interface Database {
           display_order?: number;
           is_active?: boolean;
           locale?: string;
+          translation_group_id?: string;
         };
       };
       site_settings: {

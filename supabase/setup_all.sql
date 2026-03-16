@@ -598,5 +598,17 @@ INSERT INTO faq (question, answer, display_order, locale) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
+-- 13. TRANSLATION GROUP ID (links locale variants)
+-- ============================================================
+
+ALTER TABLE destinations ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE packages ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE promotions ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE group_trips ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE events ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+ALTER TABLE faq ADD COLUMN IF NOT EXISTS translation_group_id UUID DEFAULT gen_random_uuid();
+
+-- ============================================================
 -- DONE! Your database is ready.
 -- ============================================================

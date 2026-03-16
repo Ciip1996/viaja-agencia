@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, tool, stepCountIs } from "ai";
+import { streamText, tool, stepCountIs, convertToModelMessages } from "ai";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin-client";
 import { sendQuoteNotification } from "@/lib/services/email";
@@ -46,10 +46,12 @@ export async function POST(req: Request) {
   }
   const openai = createOpenAI({ apiKey });
 
+  const modelMessages = await convertToModelMessages(messages);
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: SYSTEM_PROMPT,
-    messages,
+    messages: modelMessages,
     tools: {
       submit_quote: tool({
         description:
@@ -88,6 +90,7 @@ export async function POST(req: Request) {
             .optional()
             .describe("Number of children"),
           budgetRange: z.string().optional().describe("Budget range"),
+          preferredLocale: z.string().optional().describe("Client preferred language: es or en"),
           notes: z
             .string()
             .optional()
@@ -110,6 +113,7 @@ export async function POST(req: Request) {
               children: params.children || 0,
               budget_range: params.budgetRange || null,
               notes: params.notes || null,
+              preferred_locale: params.preferredLocale || "es",
             });
 
             if (error) {

@@ -6,6 +6,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { formatDate } from "@/lib/utils/format";
 import { ArrowLeft, Calendar, User, ArrowRight } from "lucide-react";
+import { buildAlternates, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/utils/seo";
 
 interface BlogPost {
   id: string;
@@ -64,14 +65,17 @@ export async function generateMetadata({ params }: Props) {
     return { title: "Post Not Found" };
   }
 
+  const alternates = buildAlternates(locale, `/blog/${post.slug}`);
+
   return {
-    title: `${post.title} | Blog — Viaja Agencia`,
+    title: post.title,
     description: post.excerpt,
-    alternates: { canonical: `/${locale}/blog/${post.slug}` },
+    alternates,
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      type: "article",
+      url: alternates.canonical,
+      type: "article" as const,
       publishedTime: post.published_at,
       authors: [post.author],
       ...(post.cover_image_url && {
@@ -79,7 +83,7 @@ export async function generateMetadata({ params }: Props) {
       }),
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary_large_image" as const,
       title: post.title,
       description: post.excerpt,
       ...(post.cover_image_url && { images: [post.cover_image_url] }),
@@ -113,11 +117,29 @@ export default async function BlogPostPage({ params }: Props) {
     publisher: {
       "@type": "Organization",
       name: "Viaja Agencia",
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/logo-viaja.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${BASE_URL}${locale === "es" ? "" : `/${locale}`}/blog/${post.slug}`,
     },
   };
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: "Blog", url: `${BASE_URL}${locale === "es" ? "/blog" : `/${locale}/blog`}` },
+    { name: post.title, url: `${BASE_URL}${locale === "es" ? "" : `/${locale}`}/blog/${post.slug}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -78,7 +78,7 @@ export default async function Footer({ settings = {} }: FooterProps) {
                 {t("brandName")}
               </span>
             </Link>
-            <p className="text-white/60 text-sm leading-relaxed mb-6">
+            <p className="text-white/70 text-sm leading-relaxed mb-6">
               {t("brandDescription")}
               {" "}{t("brandCertification")}
             </p>
@@ -122,7 +122,7 @@ export default async function Footer({ settings = {} }: FooterProps) {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-white/60 text-sm hover:text-accent transition-colors duration-200 cursor-pointer"
+                    className="text-white/70 text-sm hover:text-accent transition-colors duration-200 cursor-pointer"
                   >
                     {link.label}
                   </Link>
@@ -140,7 +140,7 @@ export default async function Footer({ settings = {} }: FooterProps) {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-white/60 text-sm hover:text-accent transition-colors duration-200 cursor-pointer"
+                    className="text-white/70 text-sm hover:text-accent transition-colors duration-200 cursor-pointer"
                   >
                     {link.label}
                   </Link>
@@ -154,21 +154,21 @@ export default async function Footer({ settings = {} }: FooterProps) {
               {t("contactTitle")}
             </h4>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3 text-sm text-white/60">
+              <li className="flex items-start gap-3 text-sm text-white/70">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-accent" aria-hidden="true" />
                 <span>{address}</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-white/60">
+              <li className="flex items-center gap-3 text-sm text-white/70">
                 <Phone className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
                 <span>{phone}</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-white/60">
+              <li className="flex items-center gap-3 text-sm text-white/70">
                 <Mail className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
                 <a href={`mailto:${email}`} className="hover:text-accent transition-colors cursor-pointer">
                   {email}
                 </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-white/60">
+              <li className="flex items-center gap-3 text-sm text-white/70">
                 <Clock className="w-4 h-4 shrink-0 text-accent" aria-hidden="true" />
                 <span>{horario}</span>
               </li>

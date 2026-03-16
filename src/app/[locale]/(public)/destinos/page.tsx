@@ -7,16 +7,16 @@ import { cn } from "@/lib/utils/cn";
 import { destinations as mockDestinations } from "@/lib/data/mock-data";
 import { getContentByCategory } from "@/lib/cms/content";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { buildPageMetadata, buildBreadcrumbJsonLd, buildItemListJsonLd, BASE_URL } from "@/lib/utils/seo";
+
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pageDestinos" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
+  return buildPageMetadata(locale, "/destinos", t("metaTitle"), t("metaDescription"));
 }
 
 async function getDestinations(locale: string) {
@@ -51,8 +51,31 @@ export default async function DestinosPage({ params }: Props) {
   const heroHeading = cms.destinos_hero_heading || t("heroHeading");
   const destinations = dbDestinations ?? mockDestinations;
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: t("metaTitle"), url: `${BASE_URL}${locale === "es" ? "/destinos" : `/${locale}/destinos`}` },
+  ]);
+
+  const itemListJsonLd = buildItemListJsonLd(
+    t("metaTitle"),
+    destinations.map((dest) => ({
+      name: dest.name,
+      url: `${BASE_URL}${locale === "es" ? "" : `/${locale}`}/contacto?destination=${encodeURIComponent(dest.name)}`,
+      image: dest.hero_image_url ?? undefined,
+      description: dest.description ?? undefined,
+    }))
+  );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+      />
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <Image src={heroImage} alt={t("heroAlt")} fill priority className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/40 to-black/60" />

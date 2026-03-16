@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins, Outfit } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -20,8 +20,18 @@ const outfit = Outfit({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#1a1a2e",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://viajaagencia.com.mx"),
+  title: {
+    template: "%s | Viaja Agencia",
+    default: "Viaja Agencia — Tu Agencia de Viajes en México",
+  },
   icons: {
     icon: "/logo-viaja.png",
     apple: "/logo-viaja.png",
@@ -31,6 +41,10 @@ export const metadata: Metadata = {
     url: "https://viajaagencia.com.mx",
     siteName: "Viaja Agencia",
     images: [{ url: "/logo-viaja.png", width: 512, height: 512, alt: "Viaja Agencia" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@viajaagencia",
   },
 };
 

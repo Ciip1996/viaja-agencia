@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
       children,
       budgetRange,
       notes,
+      preferredLocale,
     } = body;
 
     if (!clientName || !clientEmail) {
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
         children: children || 0,
         budget_range: budgetRange || null,
         notes: notes || null,
+        preferred_locale: preferredLocale || "es",
       })
       .select("id")
       .single();

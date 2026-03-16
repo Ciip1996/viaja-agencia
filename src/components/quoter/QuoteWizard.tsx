@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback, type FormEvent } from "react";
+import { useState, useCallback, useEffect, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import {
   X,
   Heart,
@@ -23,6 +25,7 @@ import {
   Check,
   Loader2,
   Plane,
+  Globe,
 } from "lucide-react";
 
 /* ─── Types ───────────────────────────────────────────────── */
@@ -44,6 +47,7 @@ interface WizardData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  preferredLocale: string;
 }
 
 const INITIAL_DATA: WizardData = {
@@ -58,19 +62,20 @@ const INITIAL_DATA: WizardData = {
   clientName: "",
   clientEmail: "",
   clientPhone: "",
+  preferredLocale: "es",
 };
 
 /* ─── Travel Types ────────────────────────────────────────── */
 
 const TRAVEL_TYPES = [
-  { id: "luna-de-miel", label: "Luna de Miel", icon: Heart },
-  { id: "familiar", label: "Familiar", icon: Users },
-  { id: "aventura", label: "Aventura", icon: Mountain },
-  { id: "grupos", label: "Grupos", icon: Users },
-  { id: "corporativo", label: "Corporativo", icon: Briefcase },
-  { id: "crucero", label: "Crucero", icon: Ship },
-  { id: "todo-incluido", label: "Todo Incluido", icon: Sparkles },
-  { id: "personalizado", label: "Personalizado", icon: Compass },
+  { id: "luna-de-miel", tKey: "honeymoon", icon: Heart },
+  { id: "familiar", tKey: "family", icon: Users },
+  { id: "aventura", tKey: "adventure", icon: Mountain },
+  { id: "grupos", tKey: "groups", icon: Users },
+  { id: "corporativo", tKey: "corporate", icon: Briefcase },
+  { id: "crucero", tKey: "cruise", icon: Ship },
+  { id: "todo-incluido", tKey: "allInclusive", icon: Sparkles },
+  { id: "personalizado", tKey: "custom", icon: Compass },
 ] as const;
 
 const BUDGET_RANGES = [
@@ -80,13 +85,16 @@ const BUDGET_RANGES = [
   "$100K+ MXN",
 ] as const;
 
-const STEP_LABELS = [
-  "Tipo de viaje",
-  "Destino y fechas",
-  "Viajeros",
-  "Presupuesto",
-  "Contacto",
-];
+const TRAVEL_TYPE_TKEYS: Record<string, string> = {
+  "luna-de-miel": "honeymoon",
+  familiar: "family",
+  aventura: "adventure",
+  grupos: "groups",
+  corporativo: "corporate",
+  crucero: "cruise",
+  "todo-incluido": "allInclusive",
+  personalizado: "custom",
+};
 
 /* ─── Animation variants ──────────────────────────────────── */
 
@@ -141,6 +149,8 @@ const successVariants = {
 /* ─── Main Component ──────────────────────────────────────── */
 
 export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
+  const t = useTranslations("quoter");
+  const uiLocale = useLocale();
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [data, setData] = useState<WizardData>(INITIAL_DATA);
@@ -149,6 +159,11 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
   const [error, setError] = useState("");
 
   const totalSteps = 5;
+  const stepLabels = [t("step1Title"), t("step2Title"), t("step3Title"), t("step4Title"), t("step5Title")];
+
+  useEffect(() => {
+    setData((prev) => ({ ...prev, preferredLocale: uiLocale }));
+  }, [uiLocale]);
 
   const update = useCallback(
     <K extends keyof WizardData>(key: K, value: WizardData[K]) => {
@@ -206,13 +221,13 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
 
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        throw new Error(json.error || "Error al enviar cotización");
+        throw new Error(json.error || t("errorSubmit"));
       }
 
       setSubmitted(true);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Error al enviar cotización"
+        err instanceof Error ? err.message : t("errorSubmit")
       );
     } finally {
       setSubmitting(false);
@@ -256,14 +271,14 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
             exit="exit"
             role="dialog"
             aria-modal="true"
-            aria-label="Cotizador de viaje"
+            aria-label={t("title")}
           >
             {/* Header */}
             <div className="relative border-b border-border/50 bg-gradient-to-r from-primary to-secondary px-6 pb-6 pt-6 sm:px-8">
               <button
                 onClick={handleClose}
                 className="absolute right-4 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white/15 text-white/80 transition-colors hover:bg-white/25 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/40"
-                aria-label="Cerrar"
+                aria-label={t("close")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -274,10 +289,10 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
                 </div>
                 <div>
                   <h2 className="font-heading text-lg font-semibold text-white sm:text-xl">
-                    Cotiza tu viaje
+                    {t("title")}
                   </h2>
                   <p className="text-sm text-white/70">
-                    Paso {step + 1} de {totalSteps} — {STEP_LABELS[step]}
+                    {t("stepOf", { step: step + 1, total: totalSteps })} — {stepLabels[step]}
                   </p>
                 </div>
               </div>
@@ -355,7 +370,7 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
                   className="flex cursor-pointer items-center gap-1.5 rounded-xl px-4 py-2.5 font-body text-sm font-medium text-text-muted transition-colors hover:bg-border/50 hover:text-text disabled:cursor-not-allowed disabled:opacity-0"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Atrás
+                  {t("back")}
                 </button>
 
                 {step < totalSteps - 1 ? (
@@ -364,7 +379,7 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
                     disabled={!canProceed()}
                     className="flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-6 py-2.5 font-body text-sm font-semibold text-white shadow-md transition-all hover:bg-primary-light hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    Siguiente
+                    {t("next")}
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 ) : (
@@ -376,11 +391,11 @@ export default function QuoteWizard({ isOpen, onClose }: QuoteWizardProps) {
                     {submitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Enviando…
+                        {t("sending")}
                       </>
                     ) : (
                       <>
-                        Enviar cotización
+                        {t("submit")}
                         <Check className="h-4 w-4" />
                       </>
                     )}
@@ -404,16 +419,17 @@ function StepTravelType({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const t = useTranslations("quoter");
   return (
     <div>
       <h3 className="mb-1 font-heading text-lg font-semibold text-text">
-        ¿Qué tipo de viaje deseas?
+        {t("travelTypeTitle")}
       </h3>
       <p className="mb-6 font-body text-sm text-text-muted">
-        Selecciona la opción que mejor describa tu viaje ideal.
+        {t("travelTypeDesc")}
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {TRAVEL_TYPES.map(({ id, label, icon: Icon }) => {
+        {TRAVEL_TYPES.map(({ id, tKey, icon: Icon }) => {
           const isActive = selected === id;
           return (
             <button
@@ -439,7 +455,7 @@ function StepTravelType({
                   isActive ? "text-text" : "text-text-muted"
                 }`}
               >
-                {label}
+                {t(tKey)}
               </span>
             </button>
           );
@@ -458,13 +474,14 @@ function StepDestination({
   data: WizardData;
   update: <K extends keyof WizardData>(key: K, value: WizardData[K]) => void;
 }) {
+  const t = useTranslations("quoter");
   return (
     <div>
       <h3 className="mb-1 font-heading text-lg font-semibold text-text">
-        ¿A dónde quieres ir?
+        {t("destTitle")}
       </h3>
       <p className="mb-6 font-body text-sm text-text-muted">
-        Indica tu destino soñado y las fechas de tu viaje.
+        {t("destDesc")}
       </p>
 
       <div className="space-y-4">
@@ -473,7 +490,7 @@ function StepDestination({
             htmlFor="wiz-destination"
             className="mb-1.5 block font-body text-sm font-medium text-text"
           >
-            Destino
+            {t("destination")}
           </label>
           <MapPin className="pointer-events-none absolute bottom-3 left-3.5 h-4.5 w-4.5 text-text-muted" />
           <input
@@ -481,7 +498,7 @@ function StepDestination({
             type="text"
             value={data.destination}
             onChange={(e) => update("destination", e.target.value)}
-            placeholder="Ej. Cancún, París, Tokio…"
+            placeholder={t("destPlaceholder")}
             className="h-12 w-full rounded-xl border border-border bg-white pl-11 pr-4 font-body text-sm text-text placeholder:text-text-light outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
@@ -492,7 +509,7 @@ function StepDestination({
               htmlFor="wiz-checkin"
               className="mb-1.5 block font-body text-sm font-medium text-text"
             >
-              Check-in
+              {t("checkIn")}
             </label>
             <CalendarDays className="pointer-events-none absolute bottom-3 left-3.5 h-4.5 w-4.5 text-text-muted" />
             <input
@@ -508,7 +525,7 @@ function StepDestination({
               htmlFor="wiz-checkout"
               className="mb-1.5 block font-body text-sm font-medium text-text"
             >
-              Check-out
+              {t("checkOut")}
             </label>
             <CalendarDays className="pointer-events-none absolute bottom-3 left-3.5 h-4.5 w-4.5 text-text-muted" />
             <input
@@ -534,19 +551,20 @@ function StepTravelers({
   data: WizardData;
   update: <K extends keyof WizardData>(key: K, value: WizardData[K]) => void;
 }) {
+  const t = useTranslations("quoter");
   return (
     <div>
       <h3 className="mb-1 font-heading text-lg font-semibold text-text">
-        ¿Cuántos viajeros?
+        {t("travelersTitle")}
       </h3>
       <p className="mb-8 font-body text-sm text-text-muted">
-        Indica el número de adultos y niños para tu viaje.
+        {t("travelersDesc")}
       </p>
 
       <div className="mx-auto max-w-sm space-y-6">
         <CounterRow
-          label="Adultos"
-          sublabel="13 años o más"
+          label={t("adults")}
+          sublabel={t("adultsAge")}
           value={data.adults}
           min={1}
           max={20}
@@ -554,8 +572,8 @@ function StepTravelers({
         />
         <div className="border-t border-border/50" />
         <CounterRow
-          label="Niños"
-          sublabel="0 – 12 años"
+          label={t("children")}
+          sublabel={t("childrenAge")}
           value={data.children}
           min={0}
           max={10}
@@ -621,13 +639,14 @@ function StepBudget({
   data: WizardData;
   update: <K extends keyof WizardData>(key: K, value: WizardData[K]) => void;
 }) {
+  const t = useTranslations("quoter");
   return (
     <div>
       <h3 className="mb-1 font-heading text-lg font-semibold text-text">
-        Presupuesto y notas
+        {t("budgetTitle")}
       </h3>
       <p className="mb-6 font-body text-sm text-text-muted">
-        Selecciona un rango aproximado y agrega detalles especiales.
+        {t("budgetDesc")}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
@@ -656,14 +675,14 @@ function StepBudget({
           htmlFor="wiz-notes"
           className="mb-1.5 block font-body text-sm font-medium text-text"
         >
-          Solicitudes especiales{" "}
-          <span className="text-text-light">(opcional)</span>
+          {t("specialRequests")}{" "}
+          <span className="text-text-light">({t("optional")})</span>
         </label>
         <textarea
           id="wiz-notes"
           value={data.notes}
           onChange={(e) => update("notes", e.target.value)}
-          placeholder="Aniversario, alergias alimentarias, actividades preferidas…"
+          placeholder={t("notesPlaceholder")}
           rows={3}
           className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 font-body text-sm text-text placeholder:text-text-light outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary/20"
         />
@@ -683,23 +702,23 @@ function StepContact({
   update: <K extends keyof WizardData>(key: K, value: WizardData[K]) => void;
   error: string;
 }) {
-  const travelLabel = TRAVEL_TYPES.find(
-    (t) => t.id === data.travelType
-  )?.label;
+  const t = useTranslations("quoter");
+  const travelTKey = TRAVEL_TYPE_TKEYS[data.travelType];
+  const travelLabel = travelTKey ? t(travelTKey) : undefined;
 
   return (
     <div>
       <h3 className="mb-1 font-heading text-lg font-semibold text-text">
-        Datos de contacto
+        {t("contactTitle")}
       </h3>
       <p className="mb-5 font-body text-sm text-text-muted">
-        Te contactaremos con tu cotización personalizada.
+        {t("contactDesc")}
       </p>
 
       <div className="space-y-3">
         <div className="relative">
           <label htmlFor="wiz-name" className="sr-only">
-            Nombre
+            {t("name")}
           </label>
           <User className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-text-muted" />
           <input
@@ -707,14 +726,14 @@ function StepContact({
             type="text"
             value={data.clientName}
             onChange={(e) => update("clientName", e.target.value)}
-            placeholder="Tu nombre completo"
+            placeholder={t("namePlaceholder")}
             className="h-12 w-full rounded-xl border border-border bg-white pl-11 pr-4 font-body text-sm text-text placeholder:text-text-light outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
         </div>
 
         <div className="relative">
           <label htmlFor="wiz-email" className="sr-only">
-            Email
+            {t("email")}
           </label>
           <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-text-muted" />
           <input
@@ -729,7 +748,7 @@ function StepContact({
 
         <div className="relative">
           <label htmlFor="wiz-phone" className="sr-only">
-            Teléfono (opcional)
+            {t("phonePlaceholder")}
           </label>
           <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-text-muted" />
           <input
@@ -737,44 +756,67 @@ function StepContact({
             type="tel"
             value={data.clientPhone}
             onChange={(e) => update("clientPhone", e.target.value)}
-            placeholder="Teléfono (opcional)"
+            placeholder={t("phonePlaceholder")}
             className="h-12 w-full rounded-xl border border-border bg-white pl-11 pr-4 font-body text-sm text-text placeholder:text-text-light outline-none transition-colors focus:border-secondary focus:ring-2 focus:ring-secondary/20"
           />
+        </div>
+      </div>
+
+      <div className="mt-3">
+        <label className="mb-1.5 block font-body text-sm font-medium text-text">
+          <Globe className="inline h-4 w-4 mr-1.5 text-text-muted" />
+          {t("preferredLang")}
+        </label>
+        <div className="flex gap-2">
+          {(["es", "en"] as const).map((lang) => (
+            <button
+              key={lang}
+              type="button"
+              onClick={() => update("preferredLocale", lang)}
+              className={`flex-1 cursor-pointer rounded-xl border-2 px-4 py-2.5 text-sm font-medium transition-all ${
+                data.preferredLocale === lang
+                  ? "border-accent bg-accent/8 text-text"
+                  : "border-border/60 bg-white text-text-muted hover:border-secondary/40"
+              }`}
+            >
+              {lang === "es" ? `🇲🇽 ${t("langEs")}` : `🇺🇸 ${t("langEn")}`}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Summary card */}
       <div className="mt-5 rounded-xl border border-border/60 bg-background-alt/60 p-4">
         <p className="mb-2 font-body text-xs font-semibold uppercase tracking-wider text-text-muted">
-          Resumen
+          {t("summary")}
         </p>
         <div className="space-y-1 font-body text-sm text-text">
           {travelLabel && (
             <p>
-              <span className="text-text-muted">Tipo:</span> {travelLabel}
+              <span className="text-text-muted">{t("type")}:</span> {travelLabel}
             </p>
           )}
           {data.destination && (
             <p>
-              <span className="text-text-muted">Destino:</span>{" "}
+              <span className="text-text-muted">{t("destination")}:</span>{" "}
               {data.destination}
             </p>
           )}
           {(data.checkIn || data.checkOut) && (
             <p>
-              <span className="text-text-muted">Fechas:</span>{" "}
+              <span className="text-text-muted">{t("dates")}:</span>{" "}
               {data.checkIn || "–"} → {data.checkOut || "–"}
             </p>
           )}
           <p>
-            <span className="text-text-muted">Viajeros:</span>{" "}
-            {data.adults} adulto{data.adults !== 1 ? "s" : ""}
+            <span className="text-text-muted">{t("travelers")}:</span>{" "}
+            {data.adults} {data.adults !== 1 ? t("adultsPlural") : t("adult")}
             {data.children > 0 &&
-              `, ${data.children} niño${data.children !== 1 ? "s" : ""}`}
+              `, ${data.children} ${data.children !== 1 ? t("childrenPlural") : t("child")}`}
           </p>
           {data.budgetRange && (
             <p>
-              <span className="text-text-muted">Presupuesto:</span>{" "}
+              <span className="text-text-muted">{t("budget")}:</span>{" "}
               {data.budgetRange}
             </p>
           )}
@@ -793,6 +835,7 @@ function StepContact({
 /* ─── Success State ───────────────────────────────────────── */
 
 function SuccessState({ onClose }: { onClose: () => void }) {
+  const t = useTranslations("quoter");
   return (
     <motion.div
       variants={successVariants}
@@ -811,18 +854,17 @@ function SuccessState({ onClose }: { onClose: () => void }) {
       </div>
 
       <h3 className="mb-2 font-heading text-2xl font-bold text-text">
-        ¡Cotización enviada!
+        {t("successTitle")}
       </h3>
       <p className="mx-auto max-w-sm font-body text-sm leading-relaxed text-text-muted">
-        Nuestro equipo revisará tu solicitud y te contactará en menos de 24
-        horas con una propuesta personalizada.
+        {t("successDesc")}
       </p>
 
       <button
         onClick={onClose}
         className="mt-8 cursor-pointer rounded-xl bg-primary px-8 py-3 font-body text-sm font-semibold text-white shadow-md transition-all hover:bg-primary-light hover:shadow-lg"
       >
-        Cerrar
+        {t("close")}
       </button>
     </motion.div>
   );

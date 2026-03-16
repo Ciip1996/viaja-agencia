@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Search, ChevronDown, MapPin, Calendar, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 
 const container = {
   hidden: { opacity: 0 },
@@ -57,6 +58,11 @@ export default function Hero({ content = {} }: HeroProps) {
     t("destinations.caribe"), t("destinations.estadosUnidos"), t("destinations.canada"),
     t("destinations.mexico"), t("destinations.pacifico"), t("destinations.cruceros"),
   ];
+
+  const router = useRouter();
+  const [destination, setDestination] = useState("");
+  const [date, setDate] = useState("");
+  const [travelers, setTravelers] = useState("");
 
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -121,14 +127,31 @@ export default function Hero({ content = {} }: HeroProps) {
         </motion.div>
 
         <motion.div variants={searchBarVariant} initial="hidden" animate="visible" className="mt-10 w-full max-w-4xl px-2 sm:mt-12">
-          <form className="glass-dark rounded-2xl p-3 sm:p-4" onSubmit={(e) => e.preventDefault()} aria-label={t("searchAria")}>
+          <form
+            className="glass-dark rounded-2xl p-3 sm:p-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const params = new URLSearchParams();
+              if (destination) params.set("destination", destination);
+              if (date) {
+                params.set("checkIn", date);
+                const co = new Date(date);
+                co.setDate(co.getDate() + 3);
+                params.set("checkOut", co.toISOString().split("T")[0]);
+              }
+              if (travelers) params.set("travelers", travelers);
+              router.push(`/buscar?${params.toString()}`);
+            }}
+            aria-label={t("searchAria")}
+          >
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto]">
               <div className="relative">
                 <label htmlFor="hero-destination" className="sr-only">{t("destinationLabel")}</label>
                 <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" aria-hidden="true" />
                 <select
                   id="hero-destination"
-                  defaultValue=""
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
                   className="h-12 w-full cursor-pointer appearance-none rounded-xl border border-white/10 bg-white/10 pl-10 pr-4 font-body text-sm text-white placeholder-white/50 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
                 >
                   <option value="" disabled className="text-text">{t("destinationPlaceholder")}</option>
@@ -144,6 +167,8 @@ export default function Hero({ content = {} }: HeroProps) {
                 <input
                   id="hero-date"
                   type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
                   placeholder={t("datePlaceholder")}
                   className="h-12 w-full rounded-xl border border-white/10 bg-white/10 pl-10 pr-4 font-body text-sm text-white placeholder-white/50 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent [color-scheme:dark]"
                 />
@@ -157,6 +182,8 @@ export default function Hero({ content = {} }: HeroProps) {
                   type="number"
                   min={1}
                   max={20}
+                  value={travelers}
+                  onChange={(e) => setTravelers(e.target.value)}
                   placeholder={t("travelersPlaceholder")}
                   className="h-12 w-full rounded-xl border border-white/10 bg-white/10 pl-10 pr-4 font-body text-sm text-white placeholder-white/50 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
                 />

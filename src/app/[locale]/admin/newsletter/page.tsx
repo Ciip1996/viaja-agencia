@@ -10,6 +10,7 @@ import {
   Download,
   Trash2,
 } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 import { createAdminClient } from "@/lib/supabase/admin-client";
 import { cn } from "@/lib/utils/cn";
 
@@ -24,6 +25,11 @@ interface Subscriber {
 }
 
 export default function NewsletterPage() {
+  const t = useTranslations("admin.newsletterPage");
+  const tc = useTranslations("admin.common");
+  const locale = useLocale();
+  const dateLocale = locale === "es" ? "es-MX" : "en-US";
+
   const [items, setItems] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -42,7 +48,7 @@ export default function NewsletterPage() {
       setItems(data ?? []);
       setError(null);
     } catch {
-      setError("Configura Supabase para gestionar datos");
+      setError(tc("errorSupabase"));
       setItems([]);
     } finally {
       setLoading(false);
@@ -80,7 +86,7 @@ export default function NewsletterPage() {
       setDeleteId(null);
       fetchData();
     } catch {
-      setError("Error al eliminar");
+      setError(tc("errorDelete"));
     }
   };
 
@@ -113,10 +119,10 @@ export default function NewsletterPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-text">
-            Newsletter
+            {t("pageTitle")}
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            {items.length} suscriptores · {activeCount} activos
+            {t("subscribersCount", { count: items.length, active: activeCount })}
           </p>
         </div>
         <button
@@ -125,7 +131,7 @@ export default function NewsletterPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer self-start"
         >
           <Download className="w-4 h-4" />
-          Exportar CSV
+          {t("exportCsv")}
         </button>
       </div>
 
@@ -134,7 +140,7 @@ export default function NewsletterPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
         <input
           type="text"
-          placeholder="Buscar por email..."
+          placeholder={t("searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface text-sm text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary transition-colors"
@@ -158,9 +164,9 @@ export default function NewsletterPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-text-muted">
             <Mail className="w-10 h-10 mb-3 text-text-light" />
-            <p className="font-medium">No hay suscriptores</p>
+            <p className="font-medium">{t("emptyTitle")}</p>
             <p className="text-sm mt-1">
-              {search ? "Intenta con otro término" : "Los suscriptores aparecerán aquí"}
+              {search ? tc("noResults") : t("emptyHint")}
             </p>
           </div>
         ) : (
@@ -168,11 +174,11 @@ export default function NewsletterPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-background-alt/50">
-                  <th className="text-left font-medium text-text-muted px-4 py-3">Email</th>
-                  <th className="text-left font-medium text-text-muted px-4 py-3 hidden sm:table-cell">Locale</th>
-                  <th className="text-left font-medium text-text-muted px-4 py-3 hidden md:table-cell">Fecha</th>
-                  <th className="text-center font-medium text-text-muted px-4 py-3">Activo</th>
-                  <th className="text-right font-medium text-text-muted px-4 py-3">Acciones</th>
+                  <th className="text-left font-medium text-text-muted px-4 py-3">{tc("email")}</th>
+                  <th className="text-left font-medium text-text-muted px-4 py-3 hidden sm:table-cell">{tc("locale")}</th>
+                  <th className="text-left font-medium text-text-muted px-4 py-3 hidden md:table-cell">{tc("date")}</th>
+                  <th className="text-center font-medium text-text-muted px-4 py-3">{tc("active")}</th>
+                  <th className="text-right font-medium text-text-muted px-4 py-3">{tc("actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -194,7 +200,7 @@ export default function NewsletterPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-text-muted hidden md:table-cell">
-                      {new Date(item.subscribed_at).toLocaleDateString("es-MX", {
+                      {new Date(item.subscribed_at).toLocaleDateString(dateLocale, {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
@@ -207,7 +213,7 @@ export default function NewsletterPage() {
                           "relative w-9 h-5 rounded-full transition-colors cursor-pointer",
                           item.is_active ? "bg-success" : "bg-border"
                         )}
-                        aria-label="Toggle activo"
+                        aria-label={tc("toggleActive")}
                       >
                         <span
                           className={cn(
@@ -222,7 +228,7 @@ export default function NewsletterPage() {
                         <button
                           onClick={() => setDeleteId(item.id)}
                           className="p-2 rounded-lg text-text-muted hover:bg-error/10 hover:text-error transition-colors cursor-pointer"
-                          aria-label="Eliminar"
+                          aria-label={tc("delete")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -259,10 +265,10 @@ export default function NewsletterPage() {
                 </div>
                 <div>
                   <h3 className="font-heading text-lg font-semibold text-text">
-                    Eliminar Suscriptor
+                    {t("deleteTitle")}
                   </h3>
                   <p className="text-sm text-text-muted">
-                    Esta acción no se puede deshacer
+                    {tc("deleteConfirm")}
                   </p>
                 </div>
               </div>
@@ -271,13 +277,13 @@ export default function NewsletterPage() {
                   onClick={() => setDeleteId(null)}
                   className="px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-text-muted hover:bg-background-alt transition-colors cursor-pointer"
                 >
-                  Cancelar
+                  {tc("cancel")}
                 </button>
                 <button
                   onClick={handleDelete}
                   className="px-4 py-2.5 rounded-xl bg-error text-white text-sm font-medium hover:bg-error/90 transition-colors cursor-pointer"
                 >
-                  Eliminar
+                  {tc("delete")}
                 </button>
               </div>
             </motion.div>

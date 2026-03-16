@@ -50,13 +50,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("is_published", true);
 
     if (blogPosts) {
+      const slugLocaleMap = new Map<string, { locales: string[]; published_at: string | null }>();
       for (const post of blogPosts) {
-        for (const locale of routing.locales) {
+        const existing = slugLocaleMap.get(post.slug);
+        if (existing) {
+          existing.locales.push(post.locale);
+          if (post.published_at && (!existing.published_at || post.published_at > existing.published_at)) {
+            existing.published_at = post.published_at;
+          }
+        } else {
+          slugLocaleMap.set(post.slug, { locales: [post.locale], published_at: post.published_at });
+        }
+      }
+
+      for (const [slug, { locales, published_at }] of slugLocaleMap) {
+        const blogAlternates: Record<string, string> = {};
+        for (const loc of locales) {
+          blogAlternates[loc] = `${BASE_URL}/${loc}/blog/${slug}`;
+        }
+
+        for (const locale of locales) {
           entries.push({
-            url: `${BASE_URL}/${locale}/blog/${post.slug}`,
-            lastModified: post.published_at ? new Date(post.published_at) : now,
+            url: `${BASE_URL}/${locale}/blog/${slug}`,
+            lastModified: published_at ? new Date(published_at) : now,
             changeFrequency: "weekly",
             priority: 0.6,
+            alternates: {
+              languages: blogAlternates,
+            },
           });
         }
       }

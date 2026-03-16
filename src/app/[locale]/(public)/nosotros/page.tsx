@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import {
@@ -16,18 +15,18 @@ import AnimatedSection from "@/components/ui/AnimatedSection";
 import { cn } from "@/lib/utils/cn";
 import { getContentByCategory, parseJson } from "@/lib/cms/content";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { buildPageMetadata, buildAboutPageJsonLd, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/utils/seo";
+
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
+}) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pageNosotros" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
+  return buildPageMetadata(locale, "/nosotros", t("metaTitle"), t("metaDescription"));
 }
 
 export default async function NosotrosPage({
@@ -97,8 +96,22 @@ export default async function NosotrosPage({
   const heroHeading = cms.nosotros_hero_heading || t("heroHeading");
   const cmsStats = parseJson<{ value: string; label: string }[]>(cms.nosotros_stats, []);
 
+  const aboutJsonLd = buildAboutPageJsonLd(locale as "es" | "en");
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: t("metaTitle"), url: `${BASE_URL}${locale === "es" ? "/nosotros" : `/${locale}/nosotros`}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <Image

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import {
@@ -14,18 +13,18 @@ import { cn } from "@/lib/utils/cn";
 import { getMegatravelDestUrl } from "@/lib/utils/megatravel";
 import { getContentByCategory } from "@/lib/cms/content";
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { buildPageMetadata, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/utils/seo";
+
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
+}) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pageEventos" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-  };
+  return buildPageMetadata(locale, "/eventos", t("metaTitle"), t("metaDescription"));
 }
 
 export default async function EventosPage({
@@ -79,8 +78,17 @@ export default async function EventosPage({
   const heroHeading = cms.eventos_hero_heading || t("heroHeading");
   const megatravelUrl = cms.eventos_megatravel_url || getMegatravelDestUrl(12);
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: t("metaTitle"), url: `${BASE_URL}${locale === "es" ? "/eventos" : `/${locale}/eventos`}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative h-[60vh] min-h-[420px] w-full overflow-hidden">
         <Image

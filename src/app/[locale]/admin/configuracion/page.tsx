@@ -28,6 +28,7 @@ import {
   Copy,
 } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin-client";
+import { useTranslations } from "next-intl";
 
 type Setting = {
   key: string;
@@ -45,108 +46,28 @@ const LOCALE_OPTIONS = [
 
 const CATEGORY_META: Record<
   string,
-  { label: string; icon: typeof Building2; description: string }
+  { tKey: string; icon: typeof Building2; descKey: string }
 > = {
-  general: {
-    label: "General",
-    icon: Building2,
-    description: "Información de la empresa, contacto y redes sociales",
-  },
-  feature_flags: {
-    label: "Módulos del Sitio",
-    icon: ToggleRight,
-    description: "Activa o desactiva las secciones y funcionalidades visibles en el sitio",
-  },
-  api_keys: {
-    label: "Claves API",
-    icon: KeyRound,
-    description: "Claves de acceso a servicios externos (OpenAI, Hotelbeds, etc.)",
-  },
-  homepage_hero: {
-    label: "Hero Principal",
-    icon: Home,
-    description: "Encabezado y video del hero de la página principal",
-  },
-  homepage_ofertas: {
-    label: "Ofertas",
-    icon: Sparkles,
-    description: "Sección de ofertas destacadas en la página principal",
-  },
-  homepage_porque: {
-    label: "Por qué Elegirnos",
-    icon: Star,
-    description: "Pilares de valor en la página principal",
-  },
-  homepage_destinos: {
-    label: "Destinos (Home)",
-    icon: Map,
-    description: "Sección de destinos destacados en la página principal",
-  },
-  homepage_testimonios: {
-    label: "Testimonios",
-    icon: MessageSquare,
-    description: "Encabezados de la sección de testimonios",
-  },
-  homepage_newsletter: {
-    label: "Newsletter",
-    icon: Mail,
-    description: "Sección de suscripción al newsletter",
-  },
-  homepage_faq: {
-    label: "FAQ",
-    icon: MessageSquare,
-    description: "Encabezados de la sección de preguntas frecuentes",
-  },
-  homepage_instagram: {
-    label: "Instagram",
-    icon: Instagram,
-    description: "Sección de feed de Instagram",
-  },
-  page_destinos: {
-    label: "Pág. Destinos",
-    icon: Globe,
-    description: "Contenido del hero de la página de destinos",
-  },
-  page_paquetes: {
-    label: "Pág. Paquetes",
-    icon: Sparkles,
-    description: "Contenido de la página de paquetes",
-  },
-  page_grupos: {
-    label: "Pág. Grupos",
-    icon: Users,
-    description: "Contenido del hero de viajes grupales",
-  },
-  page_eventos: {
-    label: "Pág. Eventos",
-    icon: CalendarHeart,
-    description: "Contenido de la página de eventos especiales",
-  },
-  page_nosotros: {
-    label: "Pág. Nosotros",
-    icon: Building2,
-    description: "Contenido de la página sobre nosotros",
-  },
-  page_contacto: {
-    label: "Pág. Contacto",
-    icon: MapPin,
-    description: "Contenido del hero de contacto",
-  },
-  page_hoteles: {
-    label: "Pág. Hoteles",
-    icon: Compass,
-    description: "Contenido del hero de hoteles",
-  },
-  page_tours: {
-    label: "Pág. Tours",
-    icon: Map,
-    description: "Contenido del hero de tours",
-  },
-  page_autos: {
-    label: "Pág. Autos",
-    icon: Car,
-    description: "Contenido del hero de renta de autos",
-  },
+  general: { tKey: "catGeneral", icon: Building2, descKey: "catGeneralDesc" },
+  feature_flags: { tKey: "catModules", icon: ToggleRight, descKey: "catModulesDesc" },
+  api_keys: { tKey: "catApiKeys", icon: KeyRound, descKey: "catApiKeysDesc" },
+  homepage_hero: { tKey: "catHero", icon: Home, descKey: "catHeroDesc" },
+  homepage_ofertas: { tKey: "catOffers", icon: Sparkles, descKey: "catOffersDesc" },
+  homepage_porque: { tKey: "catWhy", icon: Star, descKey: "catWhyDesc" },
+  homepage_destinos: { tKey: "catDestHome", icon: Map, descKey: "catDestHomeDesc" },
+  homepage_testimonios: { tKey: "catTestimonials", icon: MessageSquare, descKey: "catTestimonialsDesc" },
+  homepage_newsletter: { tKey: "catNewsletter", icon: Mail, descKey: "catNewsletterDesc" },
+  homepage_faq: { tKey: "catFaq", icon: MessageSquare, descKey: "catFaqDesc" },
+  homepage_instagram: { tKey: "catInstagram", icon: Instagram, descKey: "catInstagramDesc" },
+  page_destinos: { tKey: "catPageDest", icon: Globe, descKey: "catPageDestDesc" },
+  page_paquetes: { tKey: "catPagePkg", icon: Sparkles, descKey: "catPagePkgDesc" },
+  page_grupos: { tKey: "catPageGroups", icon: Users, descKey: "catPageGroupsDesc" },
+  page_eventos: { tKey: "catPageEvents", icon: CalendarHeart, descKey: "catPageEventsDesc" },
+  page_nosotros: { tKey: "catPageAbout", icon: Building2, descKey: "catPageAboutDesc" },
+  page_contacto: { tKey: "catPageContact", icon: MapPin, descKey: "catPageContactDesc" },
+  page_hoteles: { tKey: "catPageHotels", icon: Compass, descKey: "catPageHotelsDesc" },
+  page_tours: { tKey: "catPageTours", icon: Map, descKey: "catPageToursDesc" },
+  page_autos: { tKey: "catPageCars", icon: Car, descKey: "catPageCarsDesc" },
 };
 
 const CATEGORY_ORDER = [
@@ -173,6 +94,9 @@ const CATEGORY_ORDER = [
 ];
 
 export default function ConfiguracionPage() {
+  const t = useTranslations("admin.configPage");
+  const tc = useTranslations("admin.common");
+
   const [allSettings, setAllSettings] = useState<Setting[]>([]);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -186,50 +110,46 @@ export default function ConfiguracionPage() {
     setLoading(true);
     const supabase = createAdminClient();
 
-    const applyResult = (rows: Setting[]) => {
-      setAllSettings(rows);
-      const vals: Record<string, string> = {};
-      rows.forEach((s) => (vals[s.key] = s.value));
-      setEditValues(vals);
-      setError(null);
-    };
-
     try {
-      const { data, error: err } = await supabase
-        .from("site_settings")
-        .select("key, value, category, label, field_type, locale")
-        .eq("locale", locale)
-        .order("category", { ascending: true });
+      let data: Record<string, unknown>[] | null = null;
 
-      if (err) throw err;
-      applyResult((data ?? []) as Setting[]);
-    } catch {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: raw, error: err2 } = await supabase
+        const res = await supabase
+          .from("site_settings")
+          .select("key, value, category, label, field_type, locale")
+          .eq("locale", locale)
+          .order("category", { ascending: true });
+        if (res.error) throw res.error;
+        data = res.data;
+      } catch {
+        const res = await supabase
           .from("site_settings")
           .select("key, value, category, label, field_type")
           .order("category", { ascending: true });
-
-        if (err2) throw err2;
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const settings = (raw ?? []).map((r: any) => ({
-          key: r.key,
-          value: r.value,
-          category: r.category || "general",
-          label: r.label || r.key,
-          field_type: r.field_type || "text",
-          locale,
-        }));
-        applyResult(settings);
-      } catch {
-        setError("Error al cargar la configuración. Verifica tu conexión a Supabase.");
+        if (res.error) throw res.error;
+        data = res.data;
       }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const settings = (data ?? []).map((r: any) => ({
+        key: r.key,
+        value: r.value,
+        category: r.category || "general",
+        label: r.label || r.key,
+        field_type: r.field_type || "text",
+        locale: r.locale,
+      }));
+      setAllSettings(settings);
+      const vals: Record<string, string> = {};
+      settings.forEach((s) => (vals[s.key] = s.value));
+      setEditValues(vals);
+      setError(null);
+    } catch {
+      setError(t("errorLoad"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchData(activeLocale);
@@ -260,24 +180,15 @@ export default function ConfiguracionPage() {
         updated_at: new Date().toISOString(),
       }));
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await supabase.from("site_settings").upsert(upserts, { onConflict: "key,locale" }) as any;
+      const { error: upsertErr } = await supabase
+        .from("site_settings")
+        .upsert(upserts, { onConflict: "key,locale" });
 
-      if (result.error?.code === "42703") {
-        const simpleUpserts = categorySettings.map((s) => ({
-          key: s.key,
-          value: editValues[s.key] ?? s.value,
-          updated_at: new Date().toISOString(),
-        }));
-        const { error: fbErr } = await supabase.from("site_settings").upsert(simpleUpserts, { onConflict: "key" });
-        if (fbErr) throw fbErr;
-      } else if (result.error) {
-        throw result.error;
-      }
+      if (upsertErr) throw upsertErr;
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch {
-      setError("Error al guardar la configuración");
+      setError(t("errorSave"));
     } finally {
       setSaving(false);
     }
@@ -303,10 +214,10 @@ export default function ConfiguracionPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-text">
-            Gestión de Contenido
+            {t("pageTitle")}
           </h1>
           <p className="text-sm text-text-muted mt-1">
-            Administra todo el contenido del sitio web desde aquí
+            {t("pageSubtitle")}
           </p>
         </div>
         <div className="flex items-center gap-3 self-start">
@@ -337,7 +248,7 @@ export default function ConfiguracionPage() {
           ) : (
             <Save className="w-4 h-4" />
           )}
-          {saving ? "Guardando..." : success ? "Guardado" : "Guardar Cambios"}
+          {saving ? tc("saving") : success ? tc("saved") : tc("save")}
         </button>
         </div>
       </div>
@@ -358,7 +269,7 @@ export default function ConfiguracionPage() {
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-success/10 border border-success/20 text-sm text-success"
           >
             <Check className="w-4 h-4 shrink-0" />
-            Configuración guardada correctamente
+            {t("savedSuccess")}
           </motion.div>
         )}
       </AnimatePresence>
@@ -383,7 +294,7 @@ export default function ConfiguracionPage() {
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{meta.label}</span>
+                  <span className="truncate">{t(meta.tKey)}</span>
                 </button>
               );
             })}
@@ -395,10 +306,10 @@ export default function ConfiguracionPage() {
           <div className="bg-surface border border-border rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-border bg-background-alt/30">
               <h2 className="font-heading text-lg font-semibold text-text">
-                {CATEGORY_META[activeCategory]?.label ?? activeCategory}
+                {CATEGORY_META[activeCategory] ? t(CATEGORY_META[activeCategory].tKey) : activeCategory}
               </h2>
               <p className="text-xs text-text-muted mt-0.5">
-                {CATEGORY_META[activeCategory]?.description}
+                {CATEGORY_META[activeCategory] ? t(CATEGORY_META[activeCategory].descKey) : ""}
               </p>
             </div>
             <div className="px-6 py-5 space-y-5">
@@ -412,7 +323,7 @@ export default function ConfiguracionPage() {
               ))}
               {currentFields.length === 0 && (
                 <p className="text-sm text-text-muted py-8 text-center">
-                  No hay campos configurados para esta categoría.
+                  {t("noFields")}
                 </p>
               )}
             </div>
@@ -429,7 +340,7 @@ export default function ConfiguracionPage() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {saving ? "Guardando..." : "Guardar Cambios"}
+              {saving ? tc("saving") : tc("save")}
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
@@ -57,19 +57,19 @@ interface DashboardStats {
 }
 
 const STAT_CARDS = [
-  { key: "promotions" as const, label: "Promociones activas", icon: Tag, color: "text-secondary", bg: "bg-secondary/10" },
-  { key: "packages" as const, label: "Paquetes activos", icon: Package, color: "text-primary", bg: "bg-primary/10" },
-  { key: "groupTrips" as const, label: "Viajes grupales", icon: Users, color: "text-accent", bg: "bg-accent/10" },
-  { key: "blogPosts" as const, label: "Posts publicados", icon: FileText, color: "text-success", bg: "bg-success/10" },
-  { key: "quoteRequests" as const, label: "Cotizaciones", icon: MessageSquareQuote, color: "text-warning", bg: "bg-warning/10" },
-  { key: "newsletter" as const, label: "Suscriptores", icon: Mail, color: "text-info", bg: "bg-info/10" },
-  { key: "contacts" as const, label: "Contactos", icon: Inbox, color: "text-error", bg: "bg-error/10" },
+  { key: "promotions" as const, tKey: "activePromotions" as const, icon: Tag, color: "text-secondary", bg: "bg-secondary/10" },
+  { key: "packages" as const, tKey: "activePackages" as const, icon: Package, color: "text-primary", bg: "bg-primary/10" },
+  { key: "groupTrips" as const, tKey: "groupTripsLabel" as const, icon: Users, color: "text-accent", bg: "bg-accent/10" },
+  { key: "blogPosts" as const, tKey: "publishedPostsLabel" as const, icon: FileText, color: "text-success", bg: "bg-success/10" },
+  { key: "quoteRequests" as const, tKey: "quotesLabel" as const, icon: MessageSquareQuote, color: "text-warning", bg: "bg-warning/10" },
+  { key: "newsletter" as const, tKey: "subscribersLabel" as const, icon: Mail, color: "text-info", bg: "bg-info/10" },
+  { key: "contacts" as const, tKey: "contactsLabel" as const, icon: Inbox, color: "text-error", bg: "bg-error/10" },
 ] as const;
 
 const QUICK_ACTION_ITEMS = [
-  { key: "newPromotion", href: "/admin/promociones", icon: Tag, label: "Nueva Promoción" },
-  { key: "newPackage", href: "/admin/paquetes", icon: Package, label: "Nuevo Paquete" },
-  { key: "newPost", href: "/admin/blog", icon: FileText, label: "Nuevo Post" },
+  { key: "newPromotion", href: "/admin/promociones", icon: Tag, tKey: "newPromotion" as const },
+  { key: "newPackage", href: "/admin/paquetes", icon: Package, tKey: "newPackage" as const },
+  { key: "newPost", href: "/admin/blog", icon: FileText, tKey: "newPost" as const },
 ] as const;
 
 const STATUS_COLORS: Record<string, string> = {
@@ -91,6 +91,10 @@ const fadeUp = {
 
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
+  const td = useTranslations("admin.dashboardPage");
+  const tc = useTranslations("admin.common");
+  const locale = useLocale();
+  const dateLocale = locale === "es" ? "es-MX" : "en-US";
   const [stats, setStats] = useState<DashboardStats>({
     promotions: 0,
     packages: 0,
@@ -164,10 +168,10 @@ export default function AdminDashboardPage() {
   }, [fetchDashboard]);
 
   const chartData = {
-    labels: ["Nueva", "En Proceso", "Cotizada", "Cerrada"],
+    labels: [td("statusNew"), td("statusInProgress"), td("statusQuoted"), td("statusClosed")],
     datasets: [
       {
-        label: "Cotizaciones",
+        label: td("quotesDataset"),
         data: [statusCounts.nueva, statusCounts.en_proceso, statusCounts.cotizada, statusCounts.cerrada],
         backgroundColor: ["#3b82f6", "#eab308", "#22c55e", "#9ca3af"],
         borderRadius: 8,
@@ -204,7 +208,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 self-start">
             <Sparkles className="w-3.5 h-3.5 text-accent" />
             <span className="text-xs font-medium text-accent-dark">
-              {new Date().toLocaleDateString("es-MX", {
+              {new Date().toLocaleDateString(dateLocale, {
                 weekday: "long",
                 day: "numeric",
                 month: "long",
@@ -248,7 +252,7 @@ export default function AdminDashboardPage() {
                 ) : (
                   <p className="font-heading text-3xl font-bold text-text">{value}</p>
                 )}
-                <p className="mt-0.5 text-sm text-text-muted">{card.label}</p>
+                <p className="mt-0.5 text-sm text-text-muted">{td(card.tKey)}</p>
               </div>
               <div className="absolute bottom-0 left-5 right-5 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
             </motion.div>
@@ -266,7 +270,7 @@ export default function AdminDashboardPage() {
         {/* Bar Chart */}
         <div className="bg-surface border border-border rounded-2xl p-5">
           <h2 className="font-heading text-lg font-semibold text-text mb-4">
-            Cotizaciones por Estado
+            {td("chartTitle")}
           </h2>
           <div className="h-56">
             {!loading && <Bar data={chartData} options={chartOptions} />}
@@ -277,13 +281,13 @@ export default function AdminDashboardPage() {
         <div className="bg-surface border border-border rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading text-lg font-semibold text-text">
-              Actividad Reciente
+              {td("recentActivity")}
             </h2>
             <Link
               href="/admin/cotizaciones"
               className="text-xs font-medium text-secondary hover:underline"
             >
-              Ver todas
+              {td("viewAll")}
             </Link>
           </div>
           {loading ? (
@@ -292,7 +296,7 @@ export default function AdminDashboardPage() {
             </div>
           ) : recentQuotes.length === 0 ? (
             <p className="text-sm text-text-muted py-6 text-center">
-              Sin cotizaciones recientes
+              {td("noRecentQuotes")}
             </p>
           ) : (
             <div className="space-y-3">
@@ -319,7 +323,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="flex items-center gap-1 text-[11px] text-text-light shrink-0">
                     <Clock className="w-3 h-3" />
-                    {new Date(q.created_at).toLocaleDateString("es-MX", {
+                    {new Date(q.created_at).toLocaleDateString(dateLocale, {
                       day: "numeric",
                       month: "short",
                     })}
@@ -356,7 +360,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-text group-hover:text-secondary transition-colors">
-                  {action.label}
+                  {t(action.tKey)}
                 </p>
                 <p className="text-xs text-text-muted mt-0.5">{t("createNew")}</p>
               </div>

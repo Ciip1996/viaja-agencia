@@ -5,6 +5,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import AnimatedSection from "@/components/ui/AnimatedSection";
 import { formatDate } from "@/lib/utils/format";
+import { buildPageMetadata, buildBreadcrumbJsonLd, BASE_URL } from "@/lib/utils/seo";
 
 interface BlogPost {
   id: string;
@@ -30,11 +31,7 @@ type Props = {
 export async function generateMetadata({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pageBlog" });
-  return {
-    title: t("metaTitle"),
-    description: t("metaDescription"),
-    alternates: { canonical: `/${locale}/blog` },
-  };
+  return buildPageMetadata(locale, "/blog", t("metaTitle"), t("metaDescription"));
 }
 
 async function getBlogPosts(locale: string, page: number) {
@@ -67,8 +64,17 @@ export default async function BlogPage({ params, searchParams }: Props) {
   const { posts, total } = await getBlogPosts(locale, currentPage);
   const totalPages = Math.ceil(total / POSTS_PER_PAGE);
 
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: BASE_URL },
+    { name: "Blog", url: `${BASE_URL}${locale === "es" ? "/blog" : `/${locale}/blog`}` },
+  ]);
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary py-24 md:py-32">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-accent)_0%,_transparent_50%)] opacity-20" />

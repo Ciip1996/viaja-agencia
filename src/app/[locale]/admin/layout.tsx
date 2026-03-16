@@ -25,6 +25,7 @@ import {
   Mail,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { createAdminClient } from "@/lib/supabase/admin-client";
 import { cn } from "@/lib/utils/cn";
 import type { User } from "@supabase/supabase-js";
 
@@ -51,6 +52,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [authChecked, setAuthChecked] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [newQuoteCount, setNewQuoteCount] = useState(0);
+
+  const fetchNewQuoteCount = useCallback(async () => {
+    try {
+      const supabase = createAdminClient();
+      const { count } = await supabase
+        .from("quote_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "nueva")
+        .is("read_at", null);
+      setNewQuoteCount(count ?? 0);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    fetchNewQuoteCount();
+    const interval = setInterval(fetchNewQuoteCount, 30_000);
+    return () => clearInterval(interval);
+  }, [user, fetchNewQuoteCount]);
 
   const navItems = useMemo(
     () =>
@@ -204,7 +227,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 )}
                 <Icon className={cn("w-[18px] h-[18px] shrink-0", isActive && "text-primary")} />
                 {(sidebarOpen || mobileOpen) && (
-                  <span className="whitespace-nowrap">{item.label}</span>
+                  <span className="flex-1 whitespace-nowrap">{item.label}</span>
+                )}
+                {item.key === "cotizaciones" && newQuoteCount > 0 && (
+                  <span
+                    className={cn(
+                      "relative flex items-center justify-center font-bold tabular-nums",
+                      sidebarOpen || mobileOpen
+                        ? "min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-[11px] px-1.5 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                        : "absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] px-1 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+                    )}
+                  >
+                    {newQuoteCount > 99 ? "99+" : newQuoteCount}
+                    <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-30" />
+                  </span>
                 )}
               </Link>
             );

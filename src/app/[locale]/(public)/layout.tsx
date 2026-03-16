@@ -1,12 +1,14 @@
+import { Suspense, lazy } from "react";
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
-import ChatWidget from "@/components/chat/ChatWidget";
 import QuoteButton from "@/components/quoter/QuoteButton";
 import { getContentByCategory } from "@/lib/cms/content";
 import { getFeatureFlags } from "@/lib/cms/feature-flags";
 import { setRequestLocale } from "next-intl/server";
+
+const ChatWidget = lazy(() => import("@/components/chat/ChatWidget"));
 
 export default async function PublicLayout({
   children,
@@ -31,7 +33,11 @@ export default async function PublicLayout({
       <Footer settings={general} />
       <WhatsAppButton whatsappUrl={general.whatsapp || "https://wa.me/524777790610?text=Hola%2C%20me%20interesa%20cotizar%20un%20viaje"} />
       <QuoteButton />
-      {flags.feature_chatbot && <ChatWidget />}
+      {flags.feature_chatbot && (
+        <Suspense fallback={null}>
+          <ChatWidget />
+        </Suspense>
+      )}
     </>
   );
 }

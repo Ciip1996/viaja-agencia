@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils/cn";
 
 const BRAND = {
@@ -55,6 +56,7 @@ function getTextContent(message: { parts?: Array<{ type: string; text?: string }
 }
 
 export default function ChatWidget() {
+  const t = useTranslations("chatbot");
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -67,7 +69,7 @@ export default function ChatWidget() {
       parts: [
         {
           type: "text",
-          text: "¡Hola! 👋 Soy tu asistente de viajes de Viaja Agencia. ¿A dónde te gustaría viajar? Puedo ayudarte a planear tu próxima aventura.",
+          text: t("greeting"),
         },
       ],
     },
@@ -115,10 +117,10 @@ export default function ChatWidget() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             transition={{ delay: 2, type: "spring", stiffness: 200 }}
-            aria-label="Abrir agente virtual"
+            aria-label={t("subtitle")}
           >
             <Bot className="h-4 w-4" />
-            <span>Agente Virtual</span>
+            <span>{t("subtitle")}</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -152,16 +154,16 @@ export default function ChatWidget() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm leading-tight">
-                  Viaja Agencia
+                  {t("title")}
                 </p>
                 <p className="text-white/70 text-xs">
-                  Asistente de Viajes IA
+                  {t("subtitle")}
                 </p>
               </div>
               <button
                 onClick={() => setOpen(false)}
                 className="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors cursor-pointer"
-                aria-label="Cerrar chat"
+                aria-label={t("close")}
               >
                 <X className="w-4 h-4 text-white" />
               </button>
@@ -249,7 +251,7 @@ export default function ChatWidget() {
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Escribe tu mensaje..."
+                  placeholder={t("placeholder")}
                   className="flex-1 bg-gray-50 rounded-xl px-4 py-2.5 text-sm outline-none placeholder:text-gray-400 transition-shadow focus:ring-2"
                   style={
                     {
@@ -267,7 +269,7 @@ export default function ChatWidget() {
                   style={{
                     background: `linear-gradient(135deg, ${BRAND.primary}, ${BRAND.secondary})`,
                   }}
-                  aria-label="Enviar mensaje"
+                  aria-label={t("send")}
                 >
                   <Send className="w-4 h-4 text-white" />
                 </button>
