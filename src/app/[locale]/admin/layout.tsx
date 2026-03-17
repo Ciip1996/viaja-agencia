@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Plane,
   Mail,
+  UserCog,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createAdminClient } from "@/lib/supabase/admin-client";
@@ -41,6 +42,7 @@ const NAV_ICONS = [
   { key: "cotizaciones", href: "/admin/cotizaciones", icon: MessageSquareQuote },
   { key: "newsletter", href: "/admin/newsletter", icon: Mail },
   { key: "settings", href: "/admin/configuracion", icon: Settings },
+  { key: "profile", href: "/admin/perfil", icon: UserCog },
 ] as const;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -320,15 +322,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-3">
             <LanguageSwitcher scrolled />
 
-            <div className="hidden sm:block text-right">
-              <p className="text-sm font-medium text-text leading-tight truncate max-w-[180px]">
-                {user?.email ?? t("administrator")}
-              </p>
-              <p className="text-xs text-text-muted">{t("roleAdmin")}</p>
-            </div>
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xs font-semibold text-primary">{initials}</span>
-            </div>
+            <Link
+              href="/admin/perfil"
+              className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition-colors hover:bg-background-alt cursor-pointer"
+              title={t("profile")}
+            >
+              <div className="hidden sm:block text-right">
+                <p className="text-sm font-medium text-text leading-tight truncate max-w-[180px]">
+                  {user?.email ?? t("administrator")}
+                </p>
+                <p className="text-xs text-text-muted">{t("roleAdmin")}</p>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xs font-semibold text-primary">{initials}</span>
+              </div>
+            </Link>
           </div>
         </header>
 

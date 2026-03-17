@@ -89,7 +89,9 @@ export async function fetchGoogleReviews(
 
     const data = await res.json();
 
-    const reviews: GoogleReview[] = (data.reviews ?? []).map(
+    const reviews: GoogleReview[] = (data.reviews ?? []).filter(
+      (r: { rating?: number }) => (r.rating ?? 0) >= 3
+    ).map(
       (r: {
         authorAttribution?: { displayName?: string; uri?: string };
         rating?: number;
