@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "photos.hotelbeds.com",
+      },
+      {
+        protocol: "https",
         hostname: "*.supabase.co",
       },
       {

@@ -136,9 +136,6 @@ const HOTELS: Hotel[] = [
   },
 ];
 
-const ALL_AMENITY_KEYS = Array.from(
-  new Set(HOTELS.flatMap((h) => h.amenities))
-);
 
 // ---------------------------------------------------------------------------
 // Component
@@ -177,14 +174,24 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
   const [hotels, setHotels] = useState<Hotel[]>(HOTELS);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [noResultsDestination, setNoResultsDestination] = useState(false);
 
+  const [priceMax, setPriceMax] = useState(10000);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [filterStars, setFilterStars] = useState<number[]>([]);
   const [filterAmenities, setFilterAmenities] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [resultCurrency, setResultCurrency] = useState("MXN");
+
+  // Derive amenity keys from current hotel results so live API amenities appear in sidebar
+  const allAmenityKeys = useMemo(
+    () => Array.from(new Set(hotels.flatMap((h) => h.amenities))),
+    [hotels]
+  );
 
   const handleSearch = useCallback(async () => {
     setLoading(true);
+    setNoResultsDestination(false);
     try {
       const qs = new URLSearchParams({
         destination,
@@ -213,8 +220,19 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
           stars: Math.round(h.rating),
         }));
         setHotels(apiHotels);
+
+        // Dynamically adjust price range and currency from actual results
+        const prices = apiHotels.map((h) => h.price_per_night);
+        const maxPrice = Math.ceil(Math.max(...prices) * 1.1);
+        const newMax = Math.max(maxPrice, 100);
+        setPriceMax(newMax);
+        setPriceRange([0, newMax]);
+        setResultCurrency(apiHotels[0]?.currency ?? "MXN");
+        setFilterAmenities([]);
       } else {
-        setHotels(HOTELS);
+        // Destination was recognized but returned no availability, or unknown destination
+        setHotels([]);
+        setNoResultsDestination(true);
       }
       setSearched(true);
     } catch {
@@ -270,8 +288,8 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
           <input
             type="range"
             min={0}
-            max={10000}
-            step={500}
+            max={priceMax}
+            step={Math.max(1, Math.round(priceMax / 20))}
             value={priceRange[1]}
             onChange={(e) =>
               setPriceRange([priceRange[0], Number(e.target.value)])
@@ -279,8 +297,8 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
             className="w-full accent-secondary"
           />
           <div className="flex items-center justify-between font-body text-sm text-text-muted">
-            <span>{formatPrice(priceRange[0], "MXN")}</span>
-            <span>{formatPrice(priceRange[1], "MXN")}</span>
+            <span>{formatPrice(priceRange[0], resultCurrency)}</span>
+            <span>{formatPrice(priceRange[1], resultCurrency)}</span>
           </div>
         </div>
       </div>
@@ -316,7 +334,7 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
           {t("amenities")}
         </h4>
         <div className="space-y-2">
-          {ALL_AMENITY_KEYS.map((key) => {
+          {allAmenityKeys.map((key) => {
             const Icon = AMENITY_ICONS[key];
             const label = amenityLabels[key];
             if (!Icon || !label) return null;
@@ -655,7 +673,9 @@ export default function HotelesClient({ cms = {}, bookingEnabled = false }: { cm
                     {t("noResults")}
                   </p>
                   <p className="mt-2 font-body text-sm text-text-muted">
-                    {t("noResultsHint")}
+                    {noResultsDestination
+                      ? t("noResultsDestination", { destination })
+                      : t("noResultsHint")}
                   </p>
                 </div>
               )}

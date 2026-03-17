@@ -413,6 +413,7 @@
     "resultsCount": "{count} hotels found",
     "noResults": "No hotels found",
     "noResultsHint": "Try adjusting your search filters.",
+    "noResultsDestination": "We couldn't find availability for \"{destination}\". Try a different destination or dates.",
     "amenityPool": "Pool",
     "amenitySpa": "Spa",
     "amenityRestaurant": "Restaurant",

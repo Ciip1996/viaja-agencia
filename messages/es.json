@@ -413,6 +413,7 @@
     "resultsCount": "{count} hoteles encontrados",
     "noResults": "No se encontraron hoteles",
     "noResultsHint": "Intenta ajustar tus filtros de búsqueda.",
+    "noResultsDestination": "No encontramos disponibilidad para \"{destination}\". Intenta con otro destino o fechas diferentes.",
     "amenityPool": "Alberca",
     "amenitySpa": "Spa",
     "amenityRestaurant": "Restaurante",
