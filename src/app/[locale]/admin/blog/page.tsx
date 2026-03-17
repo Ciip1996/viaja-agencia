@@ -108,7 +108,7 @@ export default function BlogPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeLocale]);
+  }, [activeLocale, tc]);
 
   useEffect(() => {
     fetchData();

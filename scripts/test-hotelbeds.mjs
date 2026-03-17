@@ -5,9 +5,17 @@
  * Run:  node scripts/test-hotelbeds.mjs
  */
 
-const API_KEY = process.env.HOTELBEDS_API_KEY ?? "dc6bc67395b243962104033bba528524";
-const SECRET  = process.env.HOTELBEDS_SECRET  ?? "1b272df295";
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
+const API_KEY = process.env.HOTELBEDS_API_KEY;
+const SECRET  = process.env.HOTELBEDS_SECRET;
 const BASE    = process.env.HOTELBEDS_BASE_URL ?? "https://api.test.hotelbeds.com/hotel-api/1.0";
+
+if (!API_KEY || !SECRET) {
+  console.error("❌ Missing HOTELBEDS_API_KEY or HOTELBEDS_SECRET in .env.local");
+  process.exit(1);
+}
 
 async function generateSignature() {
   const timestamp = Math.floor(Date.now() / 1000).toString();

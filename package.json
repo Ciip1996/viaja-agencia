@@ -32,7 +32,6 @@
     "react-chartjs-2": "5.3.1",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.0",
-    "react-social-media-embed": "2.5.18",
     "resend": "6.9.3",
     "tailwind-merge": "^2.6.0",
     "zod": "^3.24.0",

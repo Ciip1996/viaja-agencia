@@ -92,7 +92,6 @@ const fadeUp = {
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
   const td = useTranslations("admin.dashboardPage");
-  const tc = useTranslations("admin.common");
   const locale = useLocale();
   const dateLocale = locale === "es" ? "es-MX" : "en-US";
   const [stats, setStats] = useState<DashboardStats>({

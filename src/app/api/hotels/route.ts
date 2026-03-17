@@ -14,12 +14,12 @@ export async function GET(request: NextRequest) {
 
   try {
     const results = await searchHotels(params);
+    // Hotel availability and prices change in real time — never serve stale data
     return NextResponse.json(
       { results, provider: "hotelbeds" },
       {
         headers: {
-          "Cache-Control":
-            "public, s-maxage=300, stale-while-revalidate=600",
+          "Cache-Control": "no-store",
         },
       }
     );

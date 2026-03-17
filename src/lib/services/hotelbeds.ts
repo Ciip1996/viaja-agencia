@@ -12,7 +12,9 @@ import type {
 
 import { getApiKey } from "@/lib/cms/api-keys";
 
-const USE_LIVE_HOTELBEDS = process.env.USE_LIVE_HOTELBEDS === "true";
+function isLive(): boolean {
+  return process.env.USE_LIVE_HOTELBEDS === "true";
+}
 
 async function getConfig(): Promise<HotelbedsConfig> {
   const [apiKey, secret, baseUrl] = await Promise.all([
@@ -146,19 +148,28 @@ function mockTransfers(): NormalizedCar[] {
 // Normalization helpers
 // ---------------------------------------------------------------------------
 
+// categoryCode is like "5EST", "4EST", "3EST" — extract leading digit
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeStars(h: any): number {
+  const match = String(h.categoryCode ?? "").match(/^(\d)/);
+  if (match) return parseInt(match[1], 10);
+  // categoryGroupCode fallback: "HOTEL" → 3
+  return 3;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeHotel(h: any): NormalizedHotel {
   const minRate = parseFloat(h.minRate || "0");
+  const destName = h.destinationName ?? "";
+  const zoneName = h.zoneName ?? "";
+  const location = [destName, zoneName].filter(Boolean).join(", ");
   return {
     id: `hb-${h.code}`,
     name: h.name || "Hotel",
-    location: `${h.destinationName || ""}, ${h.zoneName || ""}`
-      .trim()
-      .replace(/^,\s*|,\s*$/g, ""),
+    location,
     price: minRate,
     currency: h.currency || "USD",
-    rating:
-      parseFloat(h.categoryCode?.replace(/[^\d.]/g, "") || "4") || 4,
+    rating: normalizeStars(h),
     imageUrl: `https://photos.hotelbeds.com/giata/bigger/${h.code}/${h.code}a.jpg`,
     amenities: extractAmenities(h),
     provider: "hotelbeds",
@@ -186,7 +197,7 @@ function extractAmenities(h: any): string[] {
 export async function searchHotels(
   params: SearchParams
 ): Promise<NormalizedHotel[]> {
-  if (!USE_LIVE_HOTELBEDS) {
+  if (!isLive()) {
     return mockHotels();
   }
 
@@ -194,28 +205,27 @@ export async function searchHotels(
   const signature = await generateSignature(config);
   const headers = buildHeaders(config, signature);
 
-  // Hotelbeds uses destination codes; pass through if numeric, or use keyword search
-  const destination = params.destination
-    ? /^\d+$/.test(params.destination)
-      ? { code: parseInt(params.destination, 10) }
-      : { code: parseInt(params.destination, 10) || undefined }
-    : undefined;
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const body: Record<string, any> = {
     stay: { checkIn: params.checkIn, checkOut: params.checkOut },
     occupancies: [
       { rooms: params.rooms || 1, adults: params.guests || 2, children: 0 },
     ],
+    filter: { maxHotels: 20 },
   };
 
-  if (destination?.code) {
-    body.destination = destination;
-  }
-
-  // Filter by keyword if destination is a text string (not a code)
-  if (params.destination && !/^\d+$/.test(params.destination)) {
-    body.filter = { ...body.filter, keyword: params.destination };
+  // Hotelbeds destination codes are uppercase IATA-style strings (e.g. "CUN", "BCN")
+  // or numeric zone codes. Text strings use keywordSearchList instead.
+  if (params.destination) {
+    const dest = params.destination.trim();
+    if (/^[A-Z]{3}$/.test(dest) || /^\d+$/.test(dest)) {
+      // IATA airport/destination code or numeric zone code
+      body.destination = { code: dest };
+    } else {
+      // Free-text — use keywordSearchList (supported in Hotel Content API style searches)
+      body.keywordSearchList = [dest];
+      body.keywordSearchLogic = "AND";
+    }
   }
 
   try {
@@ -226,17 +236,21 @@ export async function searchHotels(
     });
 
     if (!res.ok) {
-      console.error("[Hotelbeds] Search error:", res.status, await res.text());
+      const errText = await res.text();
+      console.error("[Hotelbeds] Search error:", res.status, errText);
       return mockHotels();
     }
 
     const data = await res.json();
     const hotels = data.hotels?.hotels ?? [];
 
-    if (hotels.length === 0) return mockHotels();
+    if (hotels.length === 0) {
+      console.warn("[Hotelbeds] No results for destination:", params.destination);
+      return mockHotels();
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return hotels.map((h: any) => normalizeHotel(h)).slice(0, 20);
+    return hotels.map((h: any) => normalizeHotel(h));
   } catch (error) {
     console.error("[Hotelbeds] Search failed:", error);
     return mockHotels();
@@ -252,7 +266,7 @@ export async function getHotelDetails(
 export async function createBooking(
   params: BookingParams
 ): Promise<BookingResult> {
-  if (!USE_LIVE_HOTELBEDS) {
+  if (!isLive()) {
     return {
       confirmationId: `HB-MOCK-${Date.now()}`,
       status: "confirmed",
@@ -275,7 +289,7 @@ export async function createBooking(
 export async function cancelBooking(
   bookingId: string
 ): Promise<BookingResult> {
-  if (!USE_LIVE_HOTELBEDS) {
+  if (!isLive()) {
     return {
       confirmationId: bookingId,
       status: "cancelled",

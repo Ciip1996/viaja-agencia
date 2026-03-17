@@ -53,7 +53,7 @@ export default function NewsletterPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [tc]);
 
   useEffect(() => {
     fetchData();

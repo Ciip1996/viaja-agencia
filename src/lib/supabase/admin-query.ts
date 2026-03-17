@@ -1,5 +1,10 @@
 import { createAdminClient } from "./admin-client";
 
+interface QueryResult<T = unknown> {
+  data: T | null;
+  error: { code?: string; message?: string } | null;
+}
+
 function isMissingColumn(code: string | undefined): boolean {
   return code === "42703" || code === "PGRST204";
 }
@@ -34,8 +39,7 @@ export async function fetchWithLocale<T = Record<string, unknown>>(
 
   query = query.eq("locale", locale).order(orderCol, { ascending: asc });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = await query as any;
+  const result = await query as QueryResult<T[]>;
 
   if (isMissingColumn(result.error?.code)) {
     let fallback = supabase.from(table).select(sel);
@@ -45,8 +49,7 @@ export async function fetchWithLocale<T = Record<string, unknown>>(
       }
     }
     fallback = fallback.order(orderCol, { ascending: asc });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fb = await fallback as any;
+    const fb = await fallback as QueryResult<T[]>;
     if (fb.error) throw fb.error;
     return { data: fb.data ?? [], hasLocale: false };
   }
@@ -68,20 +71,18 @@ export async function saveWithLocale(
   const payload = { ...row, locale };
 
   if (id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await supabase.from(table).update(payload).eq("id", id) as any;
+    const result = await supabase.from(table).update(payload).eq("id", id) as QueryResult;
     if (isMissingColumn(result.error?.code)) {
-      const { locale: _l, ...noLocale } = payload;
+      const { locale: _, ...noLocale } = payload;
       const fb = await supabase.from(table).update(noLocale).eq("id", id);
       if (fb.error) throw fb.error;
       return;
     }
     if (result.error) throw result.error;
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await supabase.from(table).insert(payload) as any;
+    const result = await supabase.from(table).insert(payload) as QueryResult;
     if (isMissingColumn(result.error?.code)) {
-      const { locale: _l, ...noLocale } = payload;
+      const { locale: _, ...noLocale } = payload;
       const fb = await supabase.from(table).insert(noLocale);
       if (fb.error) throw fb.error;
       return;
@@ -106,13 +107,12 @@ export async function fetchTranslation<T = Record<string, unknown>>(
   targetLocale: string
 ): Promise<T | null> {
   const supabase = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await supabase
     .from(table)
     .select("*")
     .eq("translation_group_id", translationGroupId)
     .eq("locale", targetLocale)
-    .maybeSingle() as any;
+    .maybeSingle() as QueryResult<T>;
 
   if (isMissingColumn(result.error?.code)) return null;
   if (result.error) return null;
@@ -137,20 +137,18 @@ export async function saveWithTranslation(
   const esRow = { ...esPayload, locale: "es", translation_group_id: groupId };
 
   if (existingId) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await supabase.from(table).update(esRow).eq("id", existingId) as any;
+    const res = await supabase.from(table).update(esRow).eq("id", existingId) as QueryResult;
     if (isMissingColumn(res.error?.code)) {
-      const { translation_group_id: _tg, ...noTg } = esRow;
+      const { translation_group_id: _, ...noTg } = esRow;
       const fb = await supabase.from(table).update(noTg).eq("id", existingId);
       if (fb.error) throw fb.error;
     } else if (res.error) {
       throw res.error;
     }
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const res = await supabase.from(table).insert(esRow) as any;
+    const res = await supabase.from(table).insert(esRow) as QueryResult;
     if (isMissingColumn(res.error?.code)) {
-      const { translation_group_id: _tg, ...noTg } = esRow;
+      const { translation_group_id: _, ...noTg } = esRow;
       const fb = await supabase.from(table).insert(noTg);
       if (fb.error) throw fb.error;
     } else if (res.error) {
@@ -168,13 +166,12 @@ export async function saveWithTranslation(
   const enRow = { ...enPayload, locale: "en", translation_group_id: groupId };
 
   // Check if EN translation already exists
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const existing = await supabase
     .from(table)
     .select("id")
     .eq("translation_group_id", groupId)
     .eq("locale", "en")
-    .maybeSingle() as any;
+    .maybeSingle() as QueryResult<{ id: string }>;
 
   if (isMissingColumn(existing.error?.code)) return;
 
@@ -199,11 +196,10 @@ export async function deleteWithTranslation(
 
   if (translationGroupId) {
     // Delete all rows in the translation group
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = await supabase
       .from(table)
       .delete()
-      .eq("translation_group_id", translationGroupId) as any;
+      .eq("translation_group_id", translationGroupId) as QueryResult;
     if (isMissingColumn(res.error?.code)) {
       // Column doesn't exist, fall back to single delete
       const { error } = await supabase.from(table).delete().eq("id", id);
