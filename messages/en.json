@@ -1006,7 +1006,10 @@
     "shareOn": "Share on",
     "readingTime": "min read",
     "by": "By",
-    "page": "Page"
+    "page": "Page",
+    "gridTag": "Our Blog",
+    "gridHeading1": "Travel Articles & ",
+    "gridHeading2": "Tips"
   },
   "reviews": {
     "formTitle": "Share Your Experience",
