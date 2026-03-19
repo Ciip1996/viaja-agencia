@@ -96,6 +96,24 @@ async function testStatus() {
         hotels.slice(0, 3).forEach((h, i) => {
           console.log(`     ${i + 1}. ${h.name} — ${h.minRate} ${h.currency}`);
         });
+
+        // Print rateKeys for use in Postman
+        console.log("\n   RateKeys (copy one into your booking request):");
+        let count = 0;
+        for (const hotel of hotels) {
+          for (const room of hotel.rooms ?? []) {
+            for (const rate of room.rates ?? []) {
+              if (count >= 3) break;
+              console.log(`\n   Hotel : ${hotel.name}`);
+              console.log(`   Room  : ${room.name}`);
+              console.log(`   Type  : ${rate.rateType} | Board: ${rate.boardName} | Net: ${rate.net} ${hotel.currency}`);
+              console.log(`   Key   : ${rate.rateKey}`);
+              count++;
+            }
+            if (count >= 3) break;
+          }
+          if (count >= 3) break;
+        }
       }
     } else {
       const text = await res.text();

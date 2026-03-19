@@ -37,7 +37,7 @@ export default function Navbar({ featureFlags }: { featureFlags?: FeatureFlags }
     {
       label: t("reserve"),
       children: [
-        { href: "/hoteles", label: t("hotels") },
+        { href: "/hoteles", label: t("hotels"), flag: "feature_hoteles" },
         { href: "/tours", label: t("tours"), flag: "feature_tours" },
         { href: "/autos", label: t("carRental"), flag: "feature_autos" },
       ],

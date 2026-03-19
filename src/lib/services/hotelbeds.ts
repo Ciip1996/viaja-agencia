@@ -8,6 +8,10 @@ import type {
   BookingParams,
   BookingResult,
   NormalizedCar,
+  HotelbedsRoom,
+  HotelbedsRate,
+  HotelbedsBookingRequest,
+  HotelbedsBookingConfirmation,
 } from "./types";
 
 import { getApiKey } from "@/lib/cms/api-keys";
@@ -46,271 +50,16 @@ function buildHeaders(config: HotelbedsConfig, signature: string): Record<string
     "Api-key": config.apiKey,
     "X-Signature": signature,
     Accept: "application/json",
+    "Accept-Encoding": "gzip",
     "Content-Type": "application/json",
   };
 }
 
 // ---------------------------------------------------------------------------
-// Destination code lookup
-// Maps lowercase city/country names and common aliases to Hotelbeds destination codes.
-// Hotelbeds uses IATA airport codes for most beach/city destinations.
+// Destination code lookup — shared module
 // ---------------------------------------------------------------------------
 
-const DESTINATION_CODES: Record<string, string> = {
-  // Mexico
-  cancun: "CUN",
-  "cancún": "CUN",
-  "riviera maya": "CUN",
-  "playa del carmen": "CUN",
-  tulum: "CUN",
-  "mexico city": "MEX",
-  "ciudad de mexico": "MEX",
-  cdmx: "MEX",
-  guadalajara: "GDL",
-  monterrey: "MTY",
-  oaxaca: "OAX",
-  "los cabos": "SJD",
-  "cabo san lucas": "SJD",
-  mazatlan: "MZT",
-  "mazatlán": "MZT",
-  "puerto vallarta": "PVR",
-  huatulco: "HUX",
-  merida: "MID",
-  "mérida": "MID",
-
-  // United States
-  "united states": "MIA",
-  usa: "MIA",
-  "estados unidos": "MIA",
-  "new york": "JFK",
-  "nueva york": "JFK",
-  miami: "MIA",
-  "los angeles": "LAX",
-  "las vegas": "LAS",
-  orlando: "MCO",
-  chicago: "ORD",
-  "san francisco": "SFO",
-  hawaii: "HNL",
-  "honolulu": "HNL",
-  boston: "BOS",
-  washington: "IAD",
-
-  // Canada
-  canada: "YVR",
-  "canadá": "YVR",
-  toronto: "YYZ",
-  vancouver: "YVR",
-  montreal: "YUL",
-  calgary: "YYC",
-  ottawa: "YOW",
-
-  // Europe
-  europe: "MAD",
-  europa: "MAD",
-  spain: "MAD",
-  "españa": "MAD",
-  madrid: "MAD",
-  barcelona: "BCN",
-  seville: "SVQ",
-  "sevilla": "SVQ",
-  france: "CDG",
-  "francia": "CDG",
-  paris: "CDG",
-  "nice": "NCE",
-  italy: "FCO",
-  italia: "FCO",
-  rome: "FCO",
-  roma: "FCO",
-  milan: "MXP",
-  "milán": "MXP",
-  venice: "VCE",
-  "venecia": "VCE",
-  florence: "FLR",
-  "florencia": "FLR",
-  naples: "NAP",
-  napoles: "NAP",
-  santorini: "JTR",
-  mykonos: "JMK",
-  athens: "ATH",
-  atenas: "ATH",
-  greece: "ATH",
-  grecia: "ATH",
-  london: "LHR",
-  "londres": "LHR",
-  uk: "LHR",
-  "united kingdom": "LHR",
-  "reino unido": "LHR",
-  amsterdam: "AMS",
-  netherlands: "AMS",
-  "países bajos": "AMS",
-  portugal: "LIS",
-  lisbon: "LIS",
-  "lisboa": "LIS",
-  germany: "FRA",
-  alemania: "FRA",
-  frankfurt: "FRA",
-  berlin: "BER",
-  "berlín": "BER",
-  munich: "MUC",
-  "múnich": "MUC",
-  croatia: "DBV",
-  croacia: "DBV",
-  dubrovnik: "DBV",
-  prague: "PRG",
-  praga: "PRG",
-  vienna: "VIE",
-  viena: "VIE",
-  zurich: "ZRH",
-  "zúrich": "ZRH",
-  switzerland: "ZRH",
-  suiza: "ZRH",
-  stockholm: "ARN",
-  "estocolmo": "ARN",
-  sweden: "ARN",
-  suecia: "ARN",
-  copenhagen: "CPH",
-  "copenhague": "CPH",
-  denmark: "CPH",
-  dinamarca: "CPH",
-
-  // Middle East
-  "middle east": "DXB",
-  "medio oriente": "DXB",
-  dubai: "DXB",
-  "abu dhabi": "AUH",
-  "uae": "DXB",
-  "emiratos": "DXB",
-  istanbul: "IST",
-  turkey: "IST",
-  "turquía": "IST",
-  jordan: "AMM",
-  jordania: "AMM",
-
-  // Asia
-  asia: "BKK",
-  tokyo: "NRT",
-  tokio: "NRT",
-  japan: "NRT",
-  japon: "NRT",
-  osaka: "KIX",
-  kyoto: "KIX",
-  bangkok: "BKK",
-  thailand: "BKK",
-  tailandia: "BKK",
-  "bali": "DPS",
-  indonesia: "DPS",
-  singapore: "SIN",
-  singapur: "SIN",
-  "hong kong": "HKG",
-  beijing: "PEK",
-  "pekin": "PEK",
-  shanghai: "PVG",
-  seoul: "ICN",
-  "seul": "ICN",
-  "south korea": "ICN",
-  "corea del sur": "ICN",
-  maldives: "MLE",
-  maldivas: "MLE",
-  india: "DEL",
-  "new delhi": "DEL",
-  "nueva delhi": "DEL",
-  mumbai: "BOM",
-
-  // South America
-  "south america": "GRU",
-  sudamerica: "GRU",
-  "sudamérica": "GRU",
-  brazil: "GRU",
-  brasil: "GRU",
-  "sao paulo": "GRU",
-  "são paulo": "GRU",
-  "rio de janeiro": "GIG",
-  rio: "GIG",
-  argentina: "EZE",
-  "buenos aires": "EZE",
-  colombia: "BOG",
-  bogota: "BOG",
-  "bogotá": "BOG",
-  peru: "LIM",
-  "perú": "LIM",
-  lima: "LIM",
-  chile: "SCL",
-  santiago: "SCL",
-  ecuador: "UIO",
-  quito: "UIO",
-
-  // Central America & Caribbean
-  "central america": "SJO",
-  centroamerica: "SJO",
-  "centroamérica": "SJO",
-  "costa rica": "SJO",
-  "san jose": "SJO",
-  panama: "PTY",
-  "panamá": "PTY",
-  cuba: "HAV",
-  "la habana": "HAV",
-  havana: "HAV",
-  caribbean: "SJU",
-  caribe: "SJU",
-  "puerto rico": "SJU",
-  "dominican republic": "SDQ",
-  "republica dominicana": "SDQ",
-  "punta cana": "PUJ",
-  jamaica: "KIN",
-
-  // Africa
-  africa: "CMN",
-  "áfrica": "CMN",
-  morocco: "CMN",
-  marruecos: "CMN",
-  marrakech: "RAK",
-  "marrakesh": "RAK",
-  egypt: "CAI",
-  egipto: "CAI",
-  cairo: "CAI",
-  "el cairo": "CAI",
-  "south africa": "JNB",
-  "sudafrica": "JNB",
-  "sudáfrica": "JNB",
-  johannesburg: "JNB",
-  capetown: "CPT",
-  "cape town": "CPT",
-  "ciudad del cabo": "CPT",
-  kenya: "NBO",
-  nairobi: "NBO",
-  tanzania: "JRO",
-  "zanzibar": "ZNZ",
-  mauritius: "MRU",
-  "mauricio": "MRU",
-
-  // Pacific
-  pacific: "SYD",
-  pacifico: "SYD",
-  "pacífico": "SYD",
-  australia: "SYD",
-  sydney: "SYD",
-  melbourne: "MEL",
-  "new zealand": "AKL",
-  "nueva zelanda": "AKL",
-  auckland: "AKL",
-  fiji: "NAN",
-  "fiyi": "NAN",
-};
-
-/**
- * Resolves a free-text destination query to a Hotelbeds destination code.
- * Returns null if no match is found.
- */
-function resolveDestinationCode(query: string): string | null {
-  const key = query.trim().toLowerCase();
-  // Exact match first
-  if (DESTINATION_CODES[key]) return DESTINATION_CODES[key];
-  // Partial match: return the first entry whose key includes the query or vice versa
-  for (const [alias, code] of Object.entries(DESTINATION_CODES)) {
-    if (alias.includes(key) || key.includes(alias)) return code;
-  }
-  return null;
-}
+import { resolveDestinationCode } from "@/lib/data/destination-codes";
 
 // ---------------------------------------------------------------------------
 // Mock data generators
@@ -420,6 +169,31 @@ function normalizeStars(h: any): number {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeRooms(rawRooms: any[]): HotelbedsRoom[] {
+  return rawRooms.map((room) => ({
+    code: room.code ?? "",
+    name: room.name ?? "",
+    rates: (room.rates ?? []).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (r: any): HotelbedsRate => ({
+        rateKey: r.rateKey ?? "",
+        rateType: r.rateType === "BOOKABLE" ? "BOOKABLE" : "RECHECK",
+        net: parseFloat(r.net ?? "0"),
+        boardCode: r.boardCode ?? "",
+        boardName: r.boardName ?? "",
+        rooms: r.rooms ?? 1,
+        adults: r.adults ?? 2,
+        children: r.children ?? 0,
+        cancellationPolicies: (r.cancellationPolicies ?? []).map(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (p: any) => ({ amount: p.amount ?? "0", from: p.from ?? "" })
+        ),
+      })
+    ),
+  }));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeHotel(h: any): NormalizedHotel {
   const minRate = parseFloat(h.minRate || "0");
   const destName = h.destinationName ?? "";
@@ -435,6 +209,8 @@ function normalizeHotel(h: any): NormalizedHotel {
     imageUrl: `https://photos.hotelbeds.com/giata/bigger/${h.code}/${h.code}a.jpg`,
     amenities: extractAmenities(h),
     provider: "hotelbeds",
+    hotelCode: h.code,
+    hotelRooms: h.rooms ? normalizeRooms(h.rooms) : undefined,
   };
 }
 
@@ -473,7 +249,7 @@ export async function searchHotels(
     occupancies: [
       { rooms: params.rooms || 1, adults: params.guests || 2, children: 0 },
     ],
-    filter: { maxHotels: 20 },
+    filter: { maxHotels: 40 },
   };
 
   // Hotelbeds destination codes are uppercase IATA-style strings (e.g. "CUN", "BCN")
@@ -507,7 +283,7 @@ export async function searchHotels(
     if (!res.ok) {
       const errText = await res.text();
       console.error("[Hotelbeds] Search error:", res.status, errText);
-      return mockHotels();
+      return [];
     }
 
     const data = await res.json();
@@ -515,14 +291,14 @@ export async function searchHotels(
 
     if (hotels.length === 0) {
       console.warn("[Hotelbeds] No results for destination:", params.destination);
-      return mockHotels();
+      return [];
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return hotels.map((h: any) => normalizeHotel(h));
   } catch (error) {
     console.error("[Hotelbeds] Search failed:", error);
-    return mockHotels();
+    return [];
   }
 }
 
@@ -545,8 +321,6 @@ export async function createBooking(
     };
   }
 
-  // TODO: Implement live Hotelbeds booking confirmation
-  // POST {baseUrl}/bookings
   void params;
   return {
     confirmationId: `HB-${Date.now()}`,
@@ -566,14 +340,228 @@ export async function cancelBooking(
     };
   }
 
-  // TODO: Implement live Hotelbeds booking cancellation
-  // DELETE {baseUrl}/bookings/{bookingId}
   void bookingId;
   return {
     confirmationId: bookingId,
     status: "cancelled",
     provider: "hotelbeds",
   };
+}
+
+// ---------------------------------------------------------------------------
+// Hotelbeds Booking API — CheckRate / Book / Details / Cancel
+// ---------------------------------------------------------------------------
+
+export async function checkRate(
+  rateKey: string
+): Promise<HotelbedsRate | null> {
+  if (!isLive()) {
+    return {
+      rateKey,
+      rateType: "BOOKABLE",
+      net: 0,
+      boardCode: "BB",
+      boardName: "Bed and Breakfast",
+      rooms: 1,
+      adults: 2,
+      children: 0,
+      cancellationPolicies: [],
+    };
+  }
+
+  const config = await getConfig();
+  const signature = await generateSignature(config);
+  const headers = buildHeaders(config, signature);
+
+  try {
+    const res = await fetch(`${config.baseUrl}/checkrates`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ rooms: [{ rateKey }] }),
+    });
+
+    if (!res.ok) {
+      console.error("[Hotelbeds] CheckRate error:", res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    const room = data.hotels?.rooms?.[0];
+    const rate = room?.rates?.[0];
+    if (!rate) return null;
+
+    return {
+      rateKey: rate.rateKey,
+      rateType: rate.rateType === "BOOKABLE" ? "BOOKABLE" : "RECHECK",
+      net: parseFloat(rate.net ?? "0"),
+      boardCode: rate.boardCode ?? "",
+      boardName: rate.boardName ?? "",
+      rooms: rate.rooms ?? 1,
+      adults: rate.adults ?? 2,
+      children: rate.children ?? 0,
+      cancellationPolicies: (rate.cancellationPolicies ?? []).map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (p: any) => ({ amount: p.amount ?? "0", from: p.from ?? "" })
+      ),
+    };
+  } catch (error) {
+    console.error("[Hotelbeds] CheckRate failed:", error);
+    return null;
+  }
+}
+
+export async function createHotelbedsBooking(
+  req: HotelbedsBookingRequest
+): Promise<HotelbedsBookingConfirmation> {
+  if (!isLive()) {
+    return {
+      reference: `HB-MOCK-${Date.now()}`,
+      status: "CONFIRMED",
+      totalNet: req.rooms.length * 1000,
+      currency: "EUR",
+      hotelName: "Hotel de Prueba",
+      checkIn: new Date().toISOString().split("T")[0],
+      checkOut: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+      holder: req.holder,
+    };
+  }
+
+  const config = await getConfig();
+  const signature = await generateSignature(config);
+  const headers = buildHeaders(config, signature);
+
+  const body = {
+    holder: req.holder,
+    rooms: req.rooms,
+    clientReference: req.clientReference,
+    remark: req.remark,
+    tolerance: req.tolerance ?? 2,
+  };
+
+  const res = await fetch(`${config.baseUrl}/bookings`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || data.error) {
+    const msg = data.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+
+  const booking = data.booking;
+  const hotel = booking?.hotel;
+  const firstRate = hotel?.rooms?.[0]?.rates?.[0];
+  const policies = firstRate?.cancellationPolicies ?? [];
+
+  return {
+    reference: booking?.reference ?? "",
+    status: booking?.status ?? "ON_REQUEST",
+    totalNet: parseFloat(booking?.totalNet ?? "0"),
+    currency: booking?.currency ?? "EUR",
+    hotelName: hotel?.name ?? "",
+    checkIn: hotel?.checkIn ?? "",
+    checkOut: hotel?.checkOut ?? "",
+    holder: booking?.holder ?? req.holder,
+    cancellationAmount: policies[0]?.amount,
+    cancellationFrom: policies[0]?.from,
+  };
+}
+
+export async function getHotelbedsBooking(
+  reference: string
+): Promise<HotelbedsBookingConfirmation | null> {
+  if (!isLive()) return null;
+
+  const config = await getConfig();
+  const signature = await generateSignature(config);
+  const headers = buildHeaders(config, signature);
+
+  try {
+    const res = await fetch(`${config.baseUrl}/bookings/${reference}`, {
+      headers,
+    });
+
+    if (!res.ok) {
+      console.error("[Hotelbeds] GetBooking error:", res.status);
+      return null;
+    }
+
+    const data = await res.json();
+    const booking = data.booking;
+    const hotel = booking?.hotel;
+    const firstRate = hotel?.rooms?.[0]?.rates?.[0];
+    const policies = firstRate?.cancellationPolicies ?? [];
+
+    return {
+      reference: booking?.reference ?? reference,
+      status: booking?.status ?? "ON_REQUEST",
+      totalNet: parseFloat(booking?.totalNet ?? "0"),
+      currency: booking?.currency ?? "EUR",
+      hotelName: hotel?.name ?? "",
+      checkIn: hotel?.checkIn ?? "",
+      checkOut: hotel?.checkOut ?? "",
+      holder: booking?.holder,
+      cancellationAmount: policies[0]?.amount,
+      cancellationFrom: policies[0]?.from,
+    };
+  } catch (error) {
+    console.error("[Hotelbeds] GetBooking failed:", error);
+    return null;
+  }
+}
+
+export async function cancelHotelbedsBooking(
+  reference: string
+): Promise<HotelbedsBookingConfirmation | null> {
+  if (!isLive()) {
+    return {
+      reference,
+      status: "CANCELLED",
+      totalNet: 0,
+      currency: "EUR",
+      hotelName: "",
+      checkIn: "",
+      checkOut: "",
+      holder: { name: "", surname: "" },
+    };
+  }
+
+  const config = await getConfig();
+  const signature = await generateSignature(config);
+  const headers = buildHeaders(config, signature);
+
+  try {
+    const res = await fetch(
+      `${config.baseUrl}/bookings/${reference}?cancellationFlag=CANCELLATION`,
+      { method: "DELETE", headers }
+    );
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("[Hotelbeds] CancelBooking error:", res.status, errText);
+      return null;
+    }
+
+    const data = await res.json();
+    const booking = data.booking;
+
+    return {
+      reference: booking?.reference ?? reference,
+      status: "CANCELLED",
+      totalNet: parseFloat(booking?.totalNet ?? "0"),
+      currency: booking?.currency ?? "EUR",
+      hotelName: booking?.hotel?.name ?? "",
+      checkIn: booking?.hotel?.checkIn ?? "",
+      checkOut: booking?.hotel?.checkOut ?? "",
+      holder: booking?.holder ?? { name: "", surname: "" },
+    };
+  } catch (error) {
+    console.error("[Hotelbeds] CancelBooking failed:", error);
+    return null;
+  }
 }
 
 // TODO: Activities use a different base URL (activity-api) — needs separate config

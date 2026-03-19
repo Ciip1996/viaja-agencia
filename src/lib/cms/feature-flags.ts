@@ -23,7 +23,7 @@ const DEFAULTS: FeatureFlags = {
   feature_eventos: true,
   feature_tours: false,
   feature_autos: false,
-  feature_hoteles: true,
+  feature_hoteles: false,
   feature_hotel_booking: false,
   feature_chatbot: false,
   feature_instagram: false,
